@@ -10,8 +10,8 @@ export default function Home() {
   const handleTabChange = (tab: string) => {
     setSelectedTab(tab);
   };
-  return <div className="bg-black flex">
-    <div className="w-1/6 bg-white">
+  return <div className="bg-black flex"> 
+    <div className="w-[20%] bg-white">
     
       <Sidebar onTabChange={handleTabChange}/>
     
