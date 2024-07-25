@@ -15,35 +15,46 @@ const paths = {
     village: "/data/UP_Village.geojson",
   },
 };
+
 const mapSettings = {
   Uttarakhand: {
     district: {
       center: [30.092455768971508, 79.30945970412586],
-      zoom: 8
+      zoom: 8,
     },
     tehsil: {
       center: [29.911216569327053, 78.02489535727946],
-      zoom: 10
+      zoom: 10,
     },
     village: {
       center: [29.955333263072994, 77.87538573094236],
-      zoom: 11
-    }
+      zoom: 11,
+    },
   },
   UttarPradesh: {
     district: {
       center: [26.625, 80.678],
-      zoom: 7
+      zoom: 7,
     },
     tehsil: {
       center: [30.0, 77.542],
-      zoom: 10
+      zoom: 10,
     },
     village: {
       center: [30.0, 77.542],
-      zoom: 11
-    }
-  }
+      zoom: 11,
+    },
+  },
+};
+
+const legendColors = {
+  high: "#1a9850",
+  mediumHigh: "#66bd63",
+  medium: "#a6d96a",
+  mediumLow: "#d9ef8b",
+  low: "#fee08b",
+  negative: "#ff0000",
+  na: "#808080",
 };
 
 function Map({
@@ -73,24 +84,23 @@ function Map({
   }, [selectedState, selectedLevel, selectedMonthYear]); // Include selectedMonthYear in dependency array
 
   function getColor(formattedNdviValue) {
-    // Define color ranges based on NDVI value
     if (formattedNdviValue === "N/A" || formattedNdviValue === undefined) {
-      return "#808080"; // Gray for N/A values
+      return legendColors.na; // Gray for N/A values
     }
 
     const value = parseFloat(formattedNdviValue);
     if (value < 0) {
-      return "#ff0000"; // Red for negative values
-    } else if (value > 0.7) {
-      return "#1a9850";
+      return legendColors.negative; // Red for negative values
+    } else if (value > 0.8) {
+      return legendColors.high;
     } else if (value > 0.5) {
-      return "#66bd63";
+      return legendColors.mediumHigh;
     } else if (value > 0.3) {
-      return "#a6d96a";
+      return legendColors.medium;
     } else if (value > 0.1) {
-      return "#d9ef8b";
+      return legendColors.mediumLow;
     } else {
-      return "#fee08b";
+      return legendColors.low;
     }
   }
 
@@ -138,7 +148,7 @@ function Map({
           layer.setStyle({
             weight: 2,
             color: "red",
-            fillOpacity:1,
+            fillOpacity: 1,
           });
           layer.openPopup();
         },
@@ -160,56 +170,145 @@ function Map({
           <p>Loading...</p>
         ) : (
           <div className="border-2 border-solid border-black w-[80vw]">
-          <MapContainer
-            key={`${selectedState}-${selectedLevel}`} // Add key to ensure re-render on state or level change
-            center={center} // Use dynamic center coordinates based on selectedState and selectedLevel
-            zoom={zoom} // Use dynamic zoom level based on selectedState and selectedLevel
-            style={{ height: "100vh", width: "100%" }}
+            <MapContainer
+              key={`${selectedState}-${selectedLevel}`} // Add key to ensure re-render on state or level change
+              center={center} // Use dynamic center coordinates based on selectedState and selectedLevel
+              zoom={zoom} // Use dynamic zoom level based on selectedState and selectedLevel
+              style={{ height: "100vh", width: "100%" }}
             >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-            {geojsonData && (
-              <GeoJSON
-              data={geojsonData}
-              style={style}
-              onEachFeature={onEachFeature}
-              />
-            )}
+              {geojsonData && (
+                <GeoJSON
+                  data={geojsonData}
+                  style={style}
+                  onEachFeature={onEachFeature}
+                />
+              )}
 
-            <ScaleControl position="bottomleft" />
-          </MapContainer>
-            </div>
+              <ScaleControl position="bottomleft" />
+            </MapContainer>
+          </div>
         )}
 
         {/* Legend or Color Scale */}
-        <div style={{ position: "absolute", bottom: 10, left: 500, background: "rgba(255, 255, 255, 0.8)", padding: "10px", borderRadius: "5px", boxShadow: "0 0 5px rgba(0, 0, 0, 0.3)", zIndex: 1000 }}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 10,
+            left: 500,
+            background: "rgba(255, 255, 255, 0.8)",
+            padding: "10px",
+            borderRadius: "5px",
+            boxShadow: "0 0 5px rgba(0, 0, 0, 0.3)",
+            zIndex: 1000,
+          }}
+        >
           <h4>NDVI Legend</h4>
           <div>
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: getColor(0.8), marginRight: "5px" }}></span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.high,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>0.8+</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: getColor(0.5), marginRight: "5px" }}></span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.mediumHigh,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>0.5 - 0.79</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: getColor(0.3), marginRight: "5px" }}></span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.medium,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>0.3 - 0.49</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: getColor(0.1), marginRight: "5px" }}></span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.mediumLow,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>0.1 - 0.29</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "5px" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: getColor(-0.1), marginRight: "5px" }}></span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.low,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>Less than 0.1</span>
             </div>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <span style={{ display: "inline-block", width: "20px", height: "10px", backgroundColor: "#808080", marginRight: "5px" }}></span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors.na,
+                  marginRight: "5px",
+                }}
+              ></span>
               <span>N/A</span>
             </div>
           </div>
