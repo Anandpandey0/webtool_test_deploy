@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
     onTabChange(tab); // Pass the selected tab to the parent
   };
   return (
-    <div className="w-[20vw] h-screen border-r-2 border-gray-400 bg-white flex flex-col justify-between">
+    <div className="w-full h-screen border-r-2 border-gray-400 bg-white flex flex-col justify-between ">
       <div className="p-4 ">
         <div className="flex items-center justify-center mb-6 mt-4">
           <Image
@@ -50,6 +50,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
               <PersonIcon className="text-gray-700"  />
             </ListItemIcon>
             <ListItemText primary="Farmer Details" />
+          </ListItemButton>
+          <ListItemButton  className="custom-hover" sx={{marginBottom:'10px' , borderRadius:'10rem',color:selectedTab === 'crop_land_monitoring' ? 'white' : 'black' , backgroundColor: selectedTab === 'crop_land_monitoring' ? '#0F623D' : 'transparent' }}  onClick={() => handleListItemClick('crop_land_monitoring')}>
+            <ListItemIcon>
+              <PersonIcon className="text-gray-700"  />
+            </ListItemIcon>
+            <ListItemText primary="Crop land monitoring" />
           </ListItemButton>
           <ListItemButton className="custom-hover" sx={{marginBottom:'10px' , borderRadius:'10rem', color:selectedTab === 'saved_features' ? 'white' : 'black' ,backgroundColor: selectedTab === 'saved_features' ? '#0F623D' : 'transparent', }} onClick={() => handleListItemClick('saved_features')}>
             <ListItemIcon>
