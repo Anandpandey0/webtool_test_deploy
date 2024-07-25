@@ -1,17 +1,23 @@
 
 import Sidebar from "@/assets/home/Sidebar";
+import { useState } from "react";
 
 
 
 export default function Home() {
+  const [selectedTab, setSelectedTab] = useState('farm_dashboard');
+
+  const handleTabChange = (tab: string) => {
+    setSelectedTab(tab);
+  };
   return <div className="bg-black flex">
     <div className="w-1/6 bg-white">
     
-  <Sidebar/>
+      <Sidebar onTabChange={handleTabChange}/>
     
     </div>
   
-  <div className="flex-grow bg-gray-200">Main Content</div>
+  <div className="flex-grow bg-gray-200">{selectedTab}</div>
   
   </div>;
 }

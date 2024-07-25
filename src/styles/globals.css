@@ -7,3 +7,10 @@
 .give-border{
     border: 2px solid black;
 }
+
+.custom-hover:hover {
+    background-color:  #0F623D;
+    /* border-radius: 10rem; */
+    color: white;
+
+  }
