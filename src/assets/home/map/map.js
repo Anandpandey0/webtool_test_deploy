@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS here
 
+
 const paths = {
   Uttarakhand: {
     district: "/data/Uttarakhand_District.geojson",
@@ -169,12 +170,12 @@ function Map({
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div className="border-2 border-solid border-black w-[80vw]">
+          <div className=" w-[80vw]">
             <MapContainer
               key={`${selectedState}-${selectedLevel}`} // Add key to ensure re-render on state or level change
               center={center} // Use dynamic center coordinates based on selectedState and selectedLevel
               zoom={zoom} // Use dynamic zoom level based on selectedState and selectedLevel
-              style={{ height: "100vh", width: "100%" }}
+              style={{ height: "80vh", width: "80%" , border:"solid 2px black" }}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -198,7 +199,7 @@ function Map({
         <div
           style={{
             position: "absolute",
-            bottom: 10,
+            bottom: 150,
             left: 500,
             background: "rgba(255, 255, 255, 0.8)",
             padding: "10px",
