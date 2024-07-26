@@ -62,6 +62,8 @@ const Home: React.FC = () => {
         return <h1>Saved Features</h1>;
       case PATHS.SUPPORT:
         return <h1>Support</h1>;
+      case PATHS.LOGOUT:
+        return <h1>Logout</h1>;
       default:
         return <HomeFilters />;
     }

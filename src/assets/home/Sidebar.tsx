@@ -116,7 +116,7 @@ const Sidebar: React.FC = () => {
         </List>
       </div>
       <div className="custom-hover mt-[50rem] bottom-10" style={{ borderRadius: "10rem" }}>
-        <ListItemButton className="hover:bg-gray-400">
+        <ListItemButton className="hover:bg-gray-400" onClick={() => handleListItemClick(PATHS.LOGOUT)}>
           <ListItemIcon>
             <ExitToAppIcon className="text-gray-700" />
           </ListItemIcon>
