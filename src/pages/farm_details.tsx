@@ -1,9 +1,5 @@
-import FarmDetailsTable from "@/assets/farm_details/FarmDetailsTable";
-import HomeFilters from "@/assets/home/HomeFilters";
-import Sidebar from "@/assets/home/Sidebar";
-import path from 'path';
-import fs from 'fs';
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import FarmDetailsTable from '@/assets/farm_details/FarmDetailsTable';
 
 interface FarmDetail {
   TEHSIL: string;
@@ -23,55 +19,43 @@ interface FarmDetail {
   '2023_Rabi': number;
 }
 
-interface Props {
-  data: FarmDetail[];
-}
+const FarmDetails: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [farmDetails, setFarmDetails] = useState<FarmDetail[]>([]);
 
-const FarmDetails: React.FC<Props> = ({ data }) => {
-  const [selectedTab, setSelectedTab] = useState('farm_details');
-
-  const handleTabChange = (tab: string) => {
-    setSelectedTab(tab);
-  };
-
-  const renderContent = () => {
-    switch (selectedTab) {
-      case 'home_filters':
-        return <HomeFilters />;
-      case 'farm_details':
-        return <FarmDetailsTable data={data} />;
-      case 'saved_features':
-        return <h1>Saved Features</h1>;
-      case 'support':
-        return <h1>Support</h1>;
-      default:
-        return <h1>Farm Dashboard</h1>;
+  useEffect(() => {
+    const cachedData = localStorage.getItem('farmDetails');
+    if (cachedData) {
+      setFarmDetails(JSON.parse(cachedData));
+      setLoading(false);
+    } else {
+      fetch('/api/farm_details')
+        .then((response) => response.json())
+        .then((data: FarmDetail[]) => {
+          setFarmDetails(data);
+          localStorage.setItem('farmDetails', JSON.stringify(data));
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch farm details', error);
+          setLoading(false);
+        });
     }
-  };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-2xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-black flex">
-      <div className="w-[15vw] bg-white z-[100]">
-        <Sidebar onTabChange={handleTabChange} />
-      </div>
-      <div className="flex-grow bg-gray-200">
-        {renderContent()}
-      </div>
+    <div>
+      <FarmDetailsTable data={farmDetails} />
     </div>
   );
 };
 
-
-export const getStaticProps = async () => {
-    const filePath = path.join(process.cwd(), 'src/assets/farm_details/data/farm_details.json');
-    const jsonData = fs.readFileSync(filePath, 'utf-8');
-    const data: FarmDetail[] = JSON.parse(jsonData);
-  
-    return {
-      props: {
-        data,
-      },
-    };
-  };
-  
-export default FarmDetails
+export default FarmDetails;

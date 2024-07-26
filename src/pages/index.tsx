@@ -1,7 +1,8 @@
 import FarmDetailsTable from "@/assets/farm_details/FarmDetailsTable";
 import HomeFilters from "@/assets/home/HomeFilters";
-import Sidebar from "@/assets/home/Sidebar";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { PATHS } from "@/helper/PageHandler";
+import { useRouter } from "next/router";
 
 interface FarmDetail {
   TEHSIL: string;
@@ -22,13 +23,10 @@ interface FarmDetail {
 }
 
 const Home: React.FC = () => {
-  const [selectedTab, setSelectedTab] = useState('crop_land_monitoring');
+  const router = useRouter();
+  const [selectedTab, setSelectedTab] = useState(router.pathname);
   const [farmDetails, setFarmDetails] = useState<FarmDetail[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const handleTabChange = (tab: string) => {
-    setSelectedTab(tab);
-  };
 
   const fetchFarmDetails = useCallback(async () => {
     setLoading(true);
@@ -38,31 +36,31 @@ const Home: React.FC = () => {
       setFarmDetails(data);
     } catch (error) {
       console.error('Failed to fetch farm details', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  useMemo(() => {
-    if (selectedTab === 'farm_dashboard' && farmDetails.length === 0) {
+  useEffect(() => {
+    if (selectedTab === PATHS.FARM_DASHBOARD && farmDetails.length === 0) {
       fetchFarmDetails();
     }
   }, [selectedTab, fetchFarmDetails, farmDetails.length]);
 
   const renderContent = () => {
-    if (selectedTab === 'farm_dashboard' && loading) {
-      return <div className="flex justify-center items-center h-full">Loading...</div>;
-    }
-
     switch (selectedTab) {
-      case 'crop_land_monitoring':
+      case PATHS.CROP_LAND_MONITORING:
         return <HomeFilters />;
-      case 'farmer_details':
+      case PATHS.FARMER_DETAILS:
         return <h1>Farmer Details</h1>;
-      case 'farm_dashboard':
+      case PATHS.FARM_DASHBOARD:
+        if (loading) {
+          return <div className="flex justify-center items-center h-full">Loading...</div>;
+        }
         return <FarmDetailsTable data={farmDetails} />;
-      case 'saved_features':
+      case PATHS.SAVED_FEATURES:
         return <h1>Saved Features</h1>;
-      case 'support':
+      case PATHS.SUPPORT:
         return <h1>Support</h1>;
       default:
         return <HomeFilters />;
@@ -70,13 +68,8 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="bg-black flex">
-      <div className="w-[15vw] bg-white z-[100]">
-        <Sidebar onTabChange={handleTabChange} />
-      </div>
-      <div className="flex-grow bg-gray-200">
-        {renderContent()}
-      </div>
+    <div className="flex-grow bg-gray-200">
+      {renderContent()}
     </div>
   );
 };

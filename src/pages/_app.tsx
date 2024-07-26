@@ -1,11 +1,14 @@
-import AuthProvider from "@/components/AuthProvider";
-import "@/styles/globals.css";
-import type { AppProps } from "next/app";
+import { AppProps } from 'next/app';
+import Layout from '@/components/Layout';
+import { PATHS } from '@/helper/PageHandler';
+import '@/styles/globals.css'; // Adjust the path to your global styles if necessary
 
-export default function App({ Component, pageProps }: AppProps) {
+const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
-    <AuthProvider>
+    <Layout>
       <Component {...pageProps} />
-    </AuthProvider>
+    </Layout>
   );
-}
+};
+
+export default MyApp;

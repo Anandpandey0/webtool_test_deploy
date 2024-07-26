@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { List, ListItemIcon, ListItemText, ListItemButton } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -7,17 +7,16 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import SupportIcon from "@mui/icons-material/Support";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import AgricultureIcon from '@mui/icons-material/Agriculture';
+import { useRouter } from "next/router";
+import { PATHS } from "@/helper/PageHandler";
 
-interface SidebarProps {
-  onTabChange: (tab: string) => void;
-}
+const Sidebar: React.FC = () => {
+  const router = useRouter();
+  const [selectedTab, setSelectedTab] = useState(router.pathname);
 
-const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
-  const [selectedTab, setSelectedTab] = useState('crop_land_monitoring');
-
-  const handleListItemClick = (tab: string) => {
-    setSelectedTab(tab);
-    onTabChange(tab); // Pass the selected tab to the parent
+  const handleListItemClick = (path: string) => {
+    setSelectedTab(path);
+    router.push(path);
   };
 
   return (
@@ -27,8 +26,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
           <Image
             src="/images/logo_bhoomicam.png"
             alt="Logo"
-            width={320} // doubled the width
-            height={320} // doubled the height
+            width={160} // adjusted width
+            height={160} // adjusted height
             objectFit="contain"
           />
         </div>
@@ -37,32 +36,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
             Overview
           </h2>
         </div>
-
         <List>
+         
           <ListItemButton
             className="custom-hover"
             sx={{
               marginBottom: '10px',
               borderRadius: '10rem',
-              color: selectedTab === 'farm_dashboard' ? 'white' : 'black',
-              backgroundColor: selectedTab === 'farm_dashboard' ? '#0F623D' : 'transparent',
+              color: selectedTab === PATHS.FARMER_DETAILS ? 'white' : 'black',
+              backgroundColor: selectedTab === PATHS.FARMER_DETAILS ? '#0F623D' : 'transparent',
             }}
-            onClick={() => handleListItemClick('farm_dashboard')}
-          >
-            <ListItemIcon>
-              <DashboardIcon className="text-gray-700" />
-            </ListItemIcon>
-            <ListItemText primary="Farm Dashboard" />
-          </ListItemButton>
-          <ListItemButton
-            className="custom-hover"
-            sx={{
-              marginBottom: '10px',
-              borderRadius: '10rem',
-              color: selectedTab === 'farmer_details' ? 'white' : 'black',
-              backgroundColor: selectedTab === 'farmer_details' ? '#0F623D' : 'transparent',
-            }}
-            onClick={() => handleListItemClick('farmer_details')}
+            onClick={() => handleListItemClick(PATHS.FARMER_DETAILS)}
           >
             <ListItemIcon>
               <PersonIcon className="text-gray-700" />
@@ -74,25 +58,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
             sx={{
               marginBottom: '10px',
               borderRadius: '10rem',
-              color: selectedTab === 'crop_land_monitoring' ? 'white' : 'black',
-              backgroundColor: selectedTab === 'crop_land_monitoring' ? '#0F623D' : 'transparent',
+              color: selectedTab === PATHS.CROP_LAND_MONITORING ? 'white' : 'black',
+              backgroundColor: selectedTab === PATHS.CROP_LAND_MONITORING ? '#0F623D' : 'transparent',
             }}
-            onClick={() => handleListItemClick('crop_land_monitoring')}
+            onClick={() => handleListItemClick(PATHS.CROP_LAND_MONITORING)}
           >
             <ListItemIcon>
               <AgricultureIcon className="text-gray-700" />
             </ListItemIcon>
-            <ListItemText primary="Crop land monitoring" />
+            <ListItemText primary="Crop Land Monitoring" />
           </ListItemButton>
           <ListItemButton
             className="custom-hover"
             sx={{
               marginBottom: '10px',
               borderRadius: '10rem',
-              color: selectedTab === 'saved_features' ? 'white' : 'black',
-              backgroundColor: selectedTab === 'saved_features' ? '#0F623D' : 'transparent',
+              color: selectedTab === PATHS.SAVED_FEATURES ? 'white' : 'black',
+              backgroundColor: selectedTab === PATHS.SAVED_FEATURES ? '#0F623D' : 'transparent',
             }}
-            onClick={() => handleListItemClick('saved_features')}
+            onClick={() => handleListItemClick(PATHS.SAVED_FEATURES)}
           >
             <ListItemIcon>
               <BookmarkIcon className="text-gray-700" />
@@ -104,10 +88,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onTabChange }) => {
             sx={{
               marginBottom: '10px',
               borderRadius: '10rem',
-              color: selectedTab === 'support' ? 'white' : 'black',
-              backgroundColor: selectedTab === 'support' ? '#0F623D' : 'transparent',
+              color: selectedTab === PATHS.FARM_DASHBOARD ? 'white' : 'black',
+              backgroundColor: selectedTab === PATHS.FARM_DASHBOARD ? '#0F623D' : 'transparent',
             }}
-            onClick={() => handleListItemClick('support')}
+            onClick={() => handleListItemClick(PATHS.FARM_DASHBOARD)}
+          >
+            <ListItemIcon>
+              <DashboardIcon className="text-gray-700" />
+            </ListItemIcon>
+            <ListItemText primary="Farm Dashboard" />
+          </ListItemButton>
+          <ListItemButton
+            className="custom-hover"
+            sx={{
+              marginBottom: '10px',
+              borderRadius: '10rem',
+              color: selectedTab === PATHS.SUPPORT ? 'white' : 'black',
+              backgroundColor: selectedTab === PATHS.SUPPORT ? '#0F623D' : 'transparent',
+            }}
+            onClick={() => handleListItemClick(PATHS.SUPPORT)}
           >
             <ListItemIcon>
               <SupportIcon className="text-gray-700" />
