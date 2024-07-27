@@ -41,7 +41,7 @@ const View = () => {
     ];
   
     return (
-      <>
+      <div style={{marginLeft:"15rem"}}>
         <div style={{ padding: "10px", display: 'flex', gap: '10px' , width:'60vw' , flexWrap:'wrap' }}>
           {/* Select State */}
           <FormControl style={{ minWidth: 200 }}>
@@ -92,7 +92,7 @@ const View = () => {
           selectedMonthYear={selectedMonthYear}
           formattedMonthYear={formatMonthYear(selectedMonthYear)}
         />
-      </>
+      </div>
     );
   };
   
