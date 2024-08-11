@@ -3,6 +3,7 @@ import HomeFilters from "@/assets/home/HomeFilters";
 import { useState, useEffect, useCallback } from "react";
 import { PATHS } from "@/helper/PageHandler";
 import { useRouter } from "next/router";
+import SurveyComponent from "@/assets/survey_map/SurveyComponent";
 
 interface FarmDetail {
   TEHSIL: string;
@@ -65,7 +66,7 @@ const Home: React.FC = () => {
       case PATHS.LOGOUT:
         return <h1>Logout</h1>;
       default:
-        return <HomeFilters />;
+        return <SurveyComponent />;
     }
   };
 

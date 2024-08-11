@@ -21,3 +21,7 @@
     width: 100%;
   }
   
+  li{
+    margin-top: 2rem;
+    padding: 2rem;
+  }
