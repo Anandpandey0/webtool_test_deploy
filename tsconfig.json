@@ -16,6 +16,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/assets/home/map/map.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/assets/home/map/map.js", "src/assets/test/OlaMapComponent.jsx"],
   "exclude": ["node_modules"]
 }

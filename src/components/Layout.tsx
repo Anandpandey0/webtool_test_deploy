@@ -41,8 +41,8 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <>
+      <div className="flex-grow bg-white h-screen overflow-hidden">
       <Navbar />
-      <div className="flex-grow bg-gray-200">
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             {children}

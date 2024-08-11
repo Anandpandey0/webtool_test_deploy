@@ -70,7 +70,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex-grow bg-gray-200">
+    <div className="flex-grow bg-gray-200 overflow-hidden">
       {renderContent()}
     </div>
   );
