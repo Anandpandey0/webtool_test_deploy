@@ -12,6 +12,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl from 'mapbox-gl';
 import { Tooltip, Box, Button } from '@mui/material';
 import DrawingPopup from './DrawingPopup';
+import LocationSearch from './LocationSearch';
 
 // Set your Mapbox token here
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
@@ -84,9 +85,13 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
       zoom: 16,
       speed: 1.2,
       curve: 1,
-      easing: (t:any) => t,
+      easing: (t: any) => t,
       essential: true,
     });
+  };
+
+  const handleLocationSelect = (coordinates: { lat: number; lng: number }) => {
+    jumpToCoordinates([coordinates.lng, coordinates.lat]);
   };
 
   useImperativeHandle(ref, () => ({
@@ -95,6 +100,9 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
 
   return (
     <div className="h-screen w-full relative">
+      <Box className="absolute top-4 left-4 z-10 w-[300px]">
+        <LocationSearch onSelectLocation={handleLocationSelect} />
+      </Box>
       <Map
         ref={mapRef}
         initialViewState={{
