@@ -15,7 +15,7 @@ import DrawingPopup from './DrawingPopup';
 // import LocationSearch from './LocationSearch';
 
 // Set your Mapbox token here
-mapboxgl.accessToken = process.env.MAPBOX_TOKEN!;
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (data: any[]) => void }, ref) => {
   const mapRef = useRef<any>(null);
