@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <AppBar position="static" style={{ backgroundColor: "#0F623D" }}>
+      <AppBar position="static" style={{ backgroundColor: "#0F623D" ,zIndex:'1100'}} className="navbar">
         <Toolbar>
           <IconButton
             edge="start"
@@ -114,6 +114,24 @@ const Navbar: React.FC = () => {
                 <DashboardIcon />
               </ListItemIcon>
               <ListItemText primary="Farm Dashboard" />
+            </ListItemButton>
+            <ListItemButton
+              selected={selectedTab === PATHS.BHOOMISCORE}
+              onClick={() => handleListItemClick(PATHS.BHOOMISCORE)}
+            >
+              <ListItemIcon>
+                <SupportIcon />
+              </ListItemIcon>
+              <ListItemText primary="Bhoomiscore" />
+            </ListItemButton>
+            <ListItemButton
+              selected={selectedTab === PATHS.DAMAGE}
+              onClick={() => handleListItemClick(PATHS.DAMAGE)}
+            >
+              <ListItemIcon>
+                <SupportIcon />
+              </ListItemIcon>
+              <ListItemText primary="Damage Assesment" />
             </ListItemButton>
             <ListItemButton
               selected={selectedTab === PATHS.SUPPORT}

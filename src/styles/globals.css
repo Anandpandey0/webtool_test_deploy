@@ -2,26 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
-.give-border{
-    border: 2px solid black;
+.give-border {
+  border: 2px solid black;
 }
 
 .custom-hover:hover {
-    background-color:  #0F623D;
-    /* border-radius: 10rem; */
-    color: white;
+  background-color: #0f623d;
+  /* border-radius: 10rem; */
+  color: white;
+}
 
-  }
+#map {
+  height: 500px;
+  width: 100%;
+}
 
+li {
+  margin-top: 2rem;
+  padding: 2rem;
+}
+.mapboxgl-popup-content {
+  color: #000; /* Set the text color to black or any visible color */
+  background-color: white; /* Ensure the background is not transparent */
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
 
-  #map {
-    height: 500px;
-    width: 100%;
-  }
-  
-  li{
-    margin-top: 2rem;
-    padding: 2rem;
-  }
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1200;
+}

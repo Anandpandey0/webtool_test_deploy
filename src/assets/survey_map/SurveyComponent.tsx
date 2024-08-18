@@ -4,27 +4,34 @@ import FieldItem from '@/assets/survey_map/FieldItem'; // Adjust the import path
 import { Button } from '@mui/material';
 import ShapefileUploadPopup from '@/assets/survey_map/ShapefileUploadPopup';
 
-
 const SurveyComponent = () => {
   const [fields, setFields] = useState<any[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to manage popup visibility
-  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void } | null>(null);
+  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void; updateMap: (fields: any[]) => void, deleteDrawing: (id: string) => void } | null>(null);
 
   useEffect(() => {
     const savedFields = JSON.parse(localStorage.getItem('fieldList') || '[]');
     setFields(savedFields);
   }, []);
 
+  useEffect(() => {
+    // Update the map when fields change
+    if (mapRef.current) {
+      mapRef.current.updateMap(fields);
+    }
+  }, [fields]);
+
   const handleSaveDrawings = (drawings: any[]) => {
     setFields(drawings);
     localStorage.setItem('fieldList', JSON.stringify(drawings));
   };
 
-  const handleFieldClick = (field: any) => {
-    if (mapRef.current && Array.isArray(field.geometry.coordinates)) {
-      // Extract the first [lng, lat] pair from the nested coordinates array
-      const coordinates = field.geometry.coordinates[0][0];
+  const handleLocateField = (field: any) => {
+    if (mapRef.current && Array.isArray(field.mapDrawing.geometry.coordinates)) {
+      const coordinates = field.mapDrawing.geometry.coordinates[0][0];
       mapRef.current.jumpToCoordinates(coordinates);
+    } else {
+      console.warn('Invalid coordinates or map reference');
     }
   };
 
@@ -36,9 +43,14 @@ const SurveyComponent = () => {
   };
 
   const handleDeleteField = (index: number) => {
+    const deletedField = fields[index];
     const updatedFields = fields.filter((_, i) => i !== index);
     setFields(updatedFields);
     localStorage.setItem('fieldList', JSON.stringify(updatedFields));
+    
+    if (mapRef.current && deletedField.mapDrawing.id) {
+      mapRef.current.deleteDrawing(deletedField.mapDrawing.id);  // Trigger drawing deletion on map
+    }
   };
 
   const handleOpenPopup = () => {
@@ -58,16 +70,15 @@ const SurveyComponent = () => {
   return (
     <div
       style={{
-        width: '100vw',
-        height: '100vh',
         display: 'flex',
+         height: 'calc(100vh - 4rem)', // Full viewport height
         overflow: 'hidden', // Prevents scrolling on the parent container
       }}
     >
       <div
         className="w-[20vw] flex flex-col sidebar py-4 p-2"
         style={{
-          height: '100vh',
+          height: '100%', // Full height of the parent container
           paddingBottom: '5rem', // Ensure it takes the full height of the viewport
         }}
       >
@@ -75,7 +86,7 @@ const SurveyComponent = () => {
         <ul
           className="overflow-y-auto flex-grow field-list"
           style={{
-            maxHeight: 'calc(100vh - 10rem)', // Adjust height to account for buttons and other elements
+            flex: 1, // Take up remaining space in the sidebar
             paddingBottom: '1rem',
           }}
         >
@@ -86,7 +97,7 @@ const SurveyComponent = () => {
               index={index}
               onEdit={handleEditField}
               onDelete={handleDeleteField}
-              onClick={handleFieldClick}
+              onLocate={handleLocateField}  // Pass the handleLocateField function
             />
           ))}
         </ul>
@@ -109,6 +120,7 @@ const SurveyComponent = () => {
       <div
         className="w-[80vw] h-full"
         style={{
+          flex: 1, // Take up remaining space in the container
           overflow: 'hidden', // Prevents scrolling on the map container
         }}
       >

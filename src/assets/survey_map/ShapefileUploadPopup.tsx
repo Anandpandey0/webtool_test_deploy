@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, TextField, Button, DialogActions } from '@mui/material';
+import axios from 'axios';
 
 interface ShapefileUploadPopupProps {
   open: boolean;
   onClose: () => void;
-  onSave: (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; } }) => void;
+  onSave: (drawingData: {
+    name: string;
+    photo: string;
+    id: string;
+    files: {
+      shx: File | null;
+      dbf: File | null;
+      prj: File | null;
+      shp: File | null;
+    };
+  }) => void;
 }
 
 const ShapefileUploadPopup: React.FC<ShapefileUploadPopupProps> = ({ open, onClose, onSave }) => {
@@ -36,13 +47,43 @@ const ShapefileUploadPopup: React.FC<ShapefileUploadPopupProps> = ({ open, onClo
     }
   };
 
-  const handleSave = () => {
-    onSave({ name, photo, id, files: { shx: shxFile, dbf: dbfFile, prj: prjFile, shp: shpFile } });
-    onClose();
+  const handleSave = async () => {
+    try {
+      // First, send the files directly to the Flask API
+      const formData = new FormData();
+      if (shxFile) formData.append('shx', shxFile);
+      if (dbfFile) formData.append('dbf', dbfFile);
+      if (prjFile) formData.append('prj', prjFile);
+      if (shpFile) formData.append('shp', shpFile);
+
+      const flaskResponse = await axios.post('http://127.0.0.1:5025/convert', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Files processed by Flask API:', flaskResponse.data);
+
+      // Now, save the metadata and the GeoJSON response to MongoDB via Next.js API
+      const saveResponse = await axios.post('/api/upload/shapefile', {
+        name,
+        photo,
+        id,
+        geojson: flaskResponse.data.geojson, // Pass the GeoJSON data from Flask API
+      });
+
+      console.log('Shapefile data saved:', saveResponse.data);
+
+      // Call onSave with the form data and close the popup
+      onSave({ name, photo, id, files: { shx: shxFile, dbf: dbfFile, prj: prjFile, shp: shpFile } });
+      onClose();
+    } catch (error) {
+      console.error('There was an error processing the request:', error);
+    }
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose}   sx={{ zIndex: 1300 }} >
       <DialogTitle>Upload the Shapefile</DialogTitle>
       <DialogContent>
         <TextField
