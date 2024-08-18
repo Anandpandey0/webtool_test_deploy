@@ -47,14 +47,14 @@ const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, o
       localStorage.setItem('selectedField', JSON.stringify(field));
 
       // Navigate to the stats page
-      router.push({
-        pathname: '/field/stats',
-        query: {
-          coordinates: JSON.stringify(coordinates),
-          name: field.name,
-          id: field.id,
-        },
-      });
+      // router.push({
+      //   pathname: '/field/stats',
+      //   query: {
+      //     coordinates: JSON.stringify(coordinates),
+      //     name: field.name,
+      //     id: field.id,
+      //   },
+      // });
     } else {
       console.warn('Coordinates are missing for this field:', field);
     }
