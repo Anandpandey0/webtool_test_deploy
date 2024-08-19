@@ -175,51 +175,51 @@ function Map({ year, season }) {
         >
           <h4>Bhoomiscore Legend</h4>
           <div>
-  {Object.keys(legendColors)
-    .filter((key) => key !== 'na') // Filter out 'na' first
-    .reverse() // Reverse the order of the remaining keys
-    .map((key) => (
-      <div
-        key={key}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "5px",
-        }}
-      >
-        <span
-          style={{
-            display: "inline-block",
-            width: "20px",
-            height: "10px",
-            backgroundColor: legendColors[key],
-            marginRight: "5px",
-          }}
-        ></span>
-        <span>{key}</span>
-      </div>
-    ))}
-  {/* Add 'na' at the end */}
-  <div
-    key="na"
-    style={{
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "5px",
-    }}
-  >
-    <span
-      style={{
-        display: "inline-block",
-        width: "20px",
-        height: "10px",
-        backgroundColor: legendColors['na'],
-        marginRight: "5px",
-      }}
-    ></span>
-    <span>N/A</span>
-  </div>
-</div>
+            {Object.keys(legendColors)
+              .filter((key) => key !== "na") // Filter out 'na' first
+              .reverse() // Reverse the order of the remaining keys
+              .map((key) => (
+                <div
+                  key={key}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "5px",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "20px",
+                      height: "10px",
+                      backgroundColor: legendColors[key],
+                      marginRight: "5px",
+                    }}
+                  ></span>
+                  <span>{key}</span>
+                </div>
+              ))}
+            {/* Add 'na' at the end */}
+            <div
+              key="na"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "5px",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "20px",
+                  height: "10px",
+                  backgroundColor: legendColors["na"],
+                  marginRight: "5px",
+                }}
+              ></span>
+              <span>N/A</span>
+            </div>
+          </div>
         </div>
       </div>
     </main>

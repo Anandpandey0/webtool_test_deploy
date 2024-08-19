@@ -1,10 +1,9 @@
 
-import DamageComponent from '@/assets/damage/damage'
 import React from 'react'
 
 const Damage = () => {
   return (
-    <DamageComponent/>
+    <h1>Damage</h1>
   )
 }
 

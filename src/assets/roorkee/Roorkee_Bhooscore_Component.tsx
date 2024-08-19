@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography, TextField, Autocomplete } from '@mui/material';
 import Map from './index';
 
-const BhoomiscoreComponent = () => {
+const Roorkee_Bhooscore_Component = () => {
   const [year, setYear] = useState('');
   const [season, setSeason] = useState('');
 
@@ -91,4 +91,4 @@ const BhoomiscoreComponent = () => {
   );
 };
 
-export default BhoomiscoreComponent;
+export default Roorkee_Bhooscore_Component;

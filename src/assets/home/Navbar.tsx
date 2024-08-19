@@ -116,8 +116,8 @@ const Navbar: React.FC = () => {
               <ListItemText primary="Farm Dashboard" />
             </ListItemButton>
             <ListItemButton
-              selected={selectedTab === PATHS.BHOOMISCORE}
-              onClick={() => handleListItemClick(PATHS.BHOOMISCORE)}
+              selected={selectedTab === PATHS.Roorkee}
+              onClick={() => handleListItemClick(PATHS.Roorkee)}
             >
               <ListItemIcon>
                 <SupportIcon />
@@ -125,8 +125,8 @@ const Navbar: React.FC = () => {
               <ListItemText primary="Roorkee Bhoomiscore" />
             </ListItemButton>
             <ListItemButton
-              selected={selectedTab === PATHS.DAMAGE}
-              onClick={() => handleListItemClick(PATHS.DAMAGE)}
+              selected={selectedTab === PATHS.Bhadras}
+              onClick={() => handleListItemClick(PATHS.Bhadras)}
             >
               <ListItemIcon>
                 <SupportIcon />
