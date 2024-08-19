@@ -1,9 +1,14 @@
 
+
+import Parent from '@/assets/damage/parent/parent'
 import React from 'react'
 
 const Damage = () => {
   return (
-    <h1>Damage</h1>
+    <div className='overflow-scroll'>
+    <Parent/>
+
+    </div>
   )
 }
 

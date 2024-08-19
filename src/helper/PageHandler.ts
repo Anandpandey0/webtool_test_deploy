@@ -3,6 +3,7 @@ export const PATHS = {
     FARMER_DETAILS: '/farmer_details',
     CROP_LAND_MONITORING: '/crop_land_monitoring',
     SAVED_FEATURES: '/saved_features',
+    BHOOMISCORE: '/bhoomiscore',
     SUPPORT: '/support',
     Roorkee:'/roorkee_bhoomiscore',
     Bhadras:'/bhadras_bhoomiscore',
