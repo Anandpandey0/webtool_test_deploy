@@ -122,7 +122,7 @@ const Navbar: React.FC = () => {
               <ListItemIcon>
                 <SupportIcon />
               </ListItemIcon>
-              <ListItemText primary="Bhoomiscore" />
+              <ListItemText primary="Roorkee Bhoomiscore" />
             </ListItemButton>
             <ListItemButton
               selected={selectedTab === PATHS.DAMAGE}
@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
               <ListItemIcon>
                 <SupportIcon />
               </ListItemIcon>
-              <ListItemText primary="Damage Assesment" />
+              <ListItemText primary="Bhadras Bhoomiscore" />
             </ListItemButton>
             <ListItemButton
               selected={selectedTab === PATHS.SUPPORT}
