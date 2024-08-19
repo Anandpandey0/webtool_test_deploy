@@ -1,6 +1,6 @@
 
-import Bhadras_Bhooscore_Component from '@/assets/bhadras/bhadras_bhooscore_component'
 
+import Bhadras_Bhooscore_Component from '@/assets/bhadras/Bhadras_Bhooscore_Component'
 import React from 'react'
 
 const Bhadras_Bhoomiscore_Page = () => {
