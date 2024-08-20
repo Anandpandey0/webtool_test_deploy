@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-
+import getGeoJsonCenter from '@/helper/centroid_geojson';
 interface Coordinates {
   type: string;
   coordinates: number[][][]; // Adjust based on the structure of your coordinates
@@ -32,7 +32,15 @@ interface FieldItemProps {
 const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, onLocate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedField, setEditedField] = useState<Field>(field);
+  const [center, setCenter] = useState<number[] | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (field.mapDrawing) {
+      const centerCoordinates = getGeoJsonCenter(field.mapDrawing);
+      setCenter(centerCoordinates);
+    }
+  }, [field]);
 
   const handleSave = () => {
     onEdit(index, editedField);
@@ -47,21 +55,21 @@ const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, o
       localStorage.setItem('selectedField', JSON.stringify(field));
 
       // Navigate to the stats page
-      // router.push({
-      //   pathname: '/field/stats',
-      //   query: {
-      //     coordinates: JSON.stringify(coordinates),
-      //     name: field.name,
-      //     id: field.id,
-      //   },
-      // });
+      router.push({
+        pathname: '/field/stats',
+        query: {
+          centroid:center,
+          name: field.name,
+          id: field.id,
+        },
+      });
     } else {
       console.warn('Coordinates are missing for this field:', field);
     }
   };
 
   return (
-    <li className="mb-2 flex justify-between items-center cursor-pointer text-black give-border">
+    <li className="mb-2 flex flex-col cursor-pointer text-black give-border">
       {isEditing ? (
         <div className="p-1 border rounded-md bg-gray-100 w-full">
           <input
@@ -69,12 +77,14 @@ const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, o
             value={editedField.name || ''}
             onChange={(e) => setEditedField({ ...editedField, name: e.target.value })}
             className="p-1 mb-1 w-full border rounded text-sm"
+            placeholder="Field Name"
           />
           <input
             type="text"
             value={editedField.id || ''}
             onChange={(e) => setEditedField({ ...editedField, id: e.target.value })}
             className="p-1 mb-1 w-full border rounded text-sm"
+            placeholder="Field ID"
           />
           <div className="flex justify-end space-x-1">
             <button onClick={handleSave} className="px-2 py-1 bg-green-500 text-white rounded text-sm">Save</button>
@@ -85,6 +95,9 @@ const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, o
         <div className="p-1 border rounded-md bg-gray-100 w-full">
           <p className="text-sm">Name: {field.name || 'N/A'}</p>
           <p className="text-sm">ID: {field.id || 'N/A'}</p>
+          {center && (
+            <p className="text-sm">Center: {center[1].toFixed(5)}, {center[0].toFixed(5)}</p>
+          )}
           <div className="flex justify-end space-x-1 mt-1 gap-4">
             <button onClick={() => setIsEditing(true)} className="px-2 py-1 bg-blue-500 text-white rounded text-sm">Edit</button>
             <button onClick={() => onDelete(index)} className="px-2 py-1 bg-red-500 text-black rounded text-sm">Delete</button>

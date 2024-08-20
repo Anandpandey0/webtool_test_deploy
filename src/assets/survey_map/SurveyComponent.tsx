@@ -3,6 +3,7 @@ import MapSurveyComponent from '@/assets/survey_map/MapSurveyComponent';
 import FieldItem from '@/assets/survey_map/FieldItem'; // Adjust the import path as necessary
 import { Button } from '@mui/material';
 import ShapefileUploadPopup from '@/assets/survey_map/ShapefileUploadPopup';
+import getGeoJsonCenter from '../../helper/centroid_geojson'
 
 const SurveyComponent = () => {
   const [fields, setFields] = useState<any[]>([]);
@@ -63,7 +64,19 @@ const SurveyComponent = () => {
 
   const handleSavePopupData = (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; } }) => {
     console.log('Popup Data:', drawingData);
-    // Handle saving the uploaded shapefile data here
+
+    // Add the new field to the state and update the sidebar immediately
+    const newField = {
+      ...drawingData,
+      mapDrawing: {
+        // Assume your drawingData includes necessary GeoJSON data here
+        geometry: drawingData.geometry
+      }
+    };
+
+    const updatedFields = [...fields, newField];
+    setFields(updatedFields);
+    localStorage.setItem('fieldList', JSON.stringify(updatedFields));
     setIsPopupOpen(false); // Close the popup after saving
   };
 
@@ -71,7 +84,7 @@ const SurveyComponent = () => {
     <div
       style={{
         display: 'flex',
-         height: 'calc(100vh - 4rem)', // Full viewport height
+        height: 'calc(100vh - 4rem)', // Full viewport height
         overflow: 'hidden', // Prevents scrolling on the parent container
       }}
     >
@@ -90,16 +103,20 @@ const SurveyComponent = () => {
             paddingBottom: '1rem',
           }}
         >
-          {fields.map((field, index) => (
-            <FieldItem
-              key={index}
-              field={field}
-              index={index}
-              onEdit={handleEditField}
-              onDelete={handleDeleteField}
-              onLocate={handleLocateField}  // Pass the handleLocateField function
-            />
-          ))}
+          {fields.map((field, index) => {
+            const center = getGeoJsonCenter(field.mapDrawing); // Calculate centroid
+            return (
+              <FieldItem
+                key={index}
+                field={field}
+                index={index}
+                onEdit={handleEditField}
+                onDelete={handleDeleteField}
+                onLocate={handleLocateField}  // Pass the handleLocateField function
+                center={center} // Pass the center point to the FieldItem component
+              />
+            );
+          })}
         </ul>
         <div
           className="flex flex-col items-center space-y-2 mt-4"
