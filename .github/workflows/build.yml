@@ -1,37 +1,22 @@
 name: Next.js CI (Manual Trigger)
 
 on:
-  workflow_dispatch:  # Allows manual triggering
-    inputs:
-      branch:
-        description: 'Branch to run the workflow on'
-        required: true
-        default: 'main'
+  workflow_dispatch:  # Allows manual triggering only
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.inputs.branch }}  # Check out the specified branch
+    - uses: actions/checkout@v3  # Check out the code from the repository
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'  # Use Node.js version 18.x
+        node-version: '18.x'  # Use Node.js version 18.x or higher
 
     - run: npm install  # Install dependencies
 
     - run: npm run lint  # Run linting to check for syntax or formatting issues
 
     - run: npm run build  # Build the Next.js application
-
-    - name: Report status
-      if: success()  # This will mark the PR with a green tick if the build is successful
-      run: echo "All checks passed!"
-
-    - name: Report failure
-      if: failure()  # This will mark the PR with a red cross if the build fails
-      run: echo "Some checks failed."
