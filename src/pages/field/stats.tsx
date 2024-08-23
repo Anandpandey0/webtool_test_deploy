@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
+import { Box, TextField, Button, Typography, CircularProgress } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/router';
-import ChartDisplay from './ChartDisplay'; // Import the ChartDisplay component
+import ChartDisplay from './ChartDisplay'; 
+import Map from './index'
 
 const SurveyStatsPage = () => {
   const router = useRouter();
@@ -13,6 +14,8 @@ const SurveyStatsPage = () => {
   const [graphData, setGraphData] = useState<any>(null);
   const [coordinates, setCoordinates] = useState<any>([]);
   const [centroid, setCentroid] = useState<[number, number] | null>(null);
+  const [loading, setLoading] = useState(false); // Loading state
+  const [apiResponse,setApiResponse] = useState();
 
   useEffect(() => {
     const fieldData = localStorage.getItem('selectedField');
@@ -42,54 +45,31 @@ const SurveyStatsPage = () => {
 
   const handleViewStats = async () => {
     try {
+      setLoading(true); // Start loading
       const formData = new FormData();
       formData.append('coordinates', JSON.stringify(coordinates[0]));
       formData.append('start_date', startDate);
       formData.append('end_date', endDate);
-  
+
       const response = await fetch('http://127.0.0.1:5025/query', {
         method: 'POST',
         body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch statistics');
       }
-  
-      const data = await response.json();
 
-      // Processing the stat_api data
-      const preparedGraphData = {
-        labels: data.stat_api.Date, // Dates from the API response
-        datasets: [
-          {
-            label: 'Mean NDVI',
-            data: data.stat_api['Mean NDVI'], // NDVI data from the API response
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            fill: true,
-          },
-          {
-            label: 'Mean GCI',
-            data: data.stat_api['Mean GCI'], // GCI data from the API response
-            borderColor: 'rgba(153, 102, 255, 1)',
-            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-            fill: true,
-          },
-          {
-            label: 'Mean NDMI',
-            data: data.stat_api['Mean NDMI'], // NDMI data from the API response
-            borderColor: 'rgba(255, 159, 64, 1)',
-            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-            fill: true,
-          },
-        ],
-      };
-  
+      const data = await response.json();
+      setApiResponse(data)
+      console.log(data.stat_api.Date);
+
       setShowGraph(true);
-      setGraphData(preparedGraphData);
+      setGraphData(data.stat_api); // Set the graph data for Recharts
     } catch (error) {
       console.error('Error fetching statistics:', error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -128,13 +108,17 @@ const SurveyStatsPage = () => {
           />
         </Box>
         <Box>
-          <Button variant="contained" color="primary" fullWidth onClick={handleViewStats}>
-            View Stats
+          <Button variant="contained" color="primary" fullWidth onClick={handleViewStats} disabled={loading}>
+            {loading ? 'Loading...' : 'View Stats'}
           </Button>
         </Box>
       </div>
 
       <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+        <div className="map_container">
+          {/* Map component */}
+          <Map fieldDetails={selectedField} centroids={centroid} apiResponse={apiResponse}/>
+        </div>
         <div
           style={{
             flex: showGraph ? 1 : 0,
@@ -143,10 +127,17 @@ const SurveyStatsPage = () => {
             backgroundColor: '#ffffff',
             padding: showGraph ? '20px' : '0px',
             opacity: showGraph ? 1 : 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          {showGraph && graphData && (
-            <ChartDisplay graphData={graphData} />
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            showGraph && graphData && (
+              <ChartDisplay graphData={graphData} />
+            )
           )}
         </div>
       </div>

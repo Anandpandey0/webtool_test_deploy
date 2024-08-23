@@ -94,8 +94,8 @@ function Map({ damagedArea, percentageDamage, reimbursement }) {
 
       layer.bindPopup(`
         <b>Percentage Damage Area:</b> ${formattedValue}%<br/>
-        <b>Damage Field Area:</b> ${DamageFieldArea}%<br/>
-        <b>Reimbursement</b> ${Reimbursement}%
+        <b>Damage Field Area:</b> ${DamageFieldArea} hec<br/>
+        <b>Reimbursement : Rs </b> ${Reimbursement}
       `);
 
       layer.on({
@@ -165,7 +165,7 @@ function Map({ damagedArea, percentageDamage, reimbursement }) {
             zIndex: 1000,
           }}
         >
-          <h4>Percentage Damage Area Legend</h4>
+          <h4>Percentage Damage Area </h4>
           <div>
             {["100", "90", "80", "70", "60", "50", "40", "30", "20", "10", "0-10", "0"].map((key) => (
               <div

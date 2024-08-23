@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Bhooomicam
+            Bhoomicam
           </Typography>
           <Image
             src="/images/logo_bhoomicam.png"

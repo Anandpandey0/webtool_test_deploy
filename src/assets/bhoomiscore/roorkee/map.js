@@ -173,7 +173,7 @@ function Map({ year, season }) {
             zIndex: 1000,
           }}
         >
-          <h4>Bhoomiscore Legend</h4>
+          <h4>Bhoomiscore </h4>
           <div>
             {Object.keys(legendColors)
               .filter((key) => key !== "na") // Filter out 'na' first
