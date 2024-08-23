@@ -1,12 +1,14 @@
-name: Webtool CI
+name: Next.js CI (Manual Trigger)
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:  # Allows manual triggering
+    inputs:
+      branch:
+        description: 'Branch to run the workflow on'
+        required: true
+        default: 'main'
+  pull_request_target:
+    types: [opened, synchronize, reopened]  # Triggers when a PR is created or updated (optional)
 
 jobs:
   build:
@@ -14,10 +16,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]  # Update to only use Node.js version 18.x or higher
+        node-version: [18.x]  # Use Node.js version 18.x or higher
 
     steps:
-    - uses: actions/checkout@v3  # Check out the code from the repository
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.branch }}  # Check out the specified branch
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
