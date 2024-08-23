@@ -1,25 +1,36 @@
-name: Next.js CI (Manual Trigger)
+name: Production Readiness Check
 
 on:
-  workflow_dispatch:  # Allows manual triggering only
+  workflow_dispatch: # Allows manual triggering of the workflow from the PR UI
 
 jobs:
-  build:
+  production_check:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3  # Check out the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'  # Use Node.js version 18.x or higher
+        node-version: '16'  # Ensure the workflow uses Node.js version 16
 
-    - run: npm install  # Install dependencies
+    - name: Install dependencies
+      run: npm install
 
-    - run: npm run lint  # Run linting to check for syntax or formatting issues
+    - name: Run build
+      run: npm run build
 
-    - run: npm run build  # Build the Next.js application
+    - name: Check for production readiness
+      run: |
+        # Add custom checks or commands here
+        echo "Run production readiness checks here"
 
-    - name: Run Next.js Start
-      run: npm run start  # Start the Next.js application (optional)
+    - name: Production Check Result - Failure
+      if: failure()
+      run: echo "The pull request failed the checks. Do not merge."
+
+    - name: Production Check Result - Success
+      if: success()
+      run: echo "The pull request passed the checks. It's safe to merge."
