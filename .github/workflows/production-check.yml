@@ -1,7 +1,8 @@
 name: Production Readiness Check
 
 on:
-  workflow_dispatch: # Allows manual triggering of the workflow from the PR UI
+  pull_request:  # Automatically runs on PR creation, update, or reopening
+    types: [opened, synchronize, reopened]
 
 jobs:
   production_check:
