@@ -1,4 +1,4 @@
-name: Webtool CI (Manual Trigger)
+name: Next.js CI (Manual Trigger)
 
 on:
   workflow_dispatch:  # Allows manual triggering
@@ -12,10 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]  # Use Node.js version 18.x or higher
-
     steps:
     - uses: actions/checkout@v3
       with:
@@ -24,10 +20,18 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: '18.x'  # Use Node.js version 18.x
 
     - run: npm install  # Install dependencies
 
     - run: npm run lint  # Run linting to check for syntax or formatting issues
 
     - run: npm run build  # Build the Next.js application
+
+    - name: Report status
+      if: success()  # This will mark the PR with a green tick if the build is successful
+      run: echo "All checks passed!"
+
+    - name: Report failure
+      if: failure()  # This will mark the PR with a red cross if the build fails
+      run: echo "Some checks failed."
