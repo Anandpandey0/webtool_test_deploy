@@ -14,7 +14,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.17.0'  # Update to the required Node.js version
+        node-version: '18.17.0'  # Or your preferred Node.js version
 
     - name: Install dependencies
       run: npm install
@@ -24,7 +24,6 @@ jobs:
 
     - name: Check for production readiness
       run: |
-        # Add custom checks or commands here
         echo "Run production readiness checks here"
 
     - name: Production Check Result - Failure
