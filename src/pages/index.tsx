@@ -5,6 +5,7 @@ import { PATHS } from "@/helper/PageHandler";
 import { useRouter } from "next/router";
 import SurveyComponent from "@/assets/survey_map/SurveyComponent";
 
+
 interface FarmDetail {
   TEHSIL: string;
   DISTRICT: string;
@@ -72,6 +73,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex-grow bg-gray-200 overflow-hidden">
+
       {renderContent()}
     </div>
   );
