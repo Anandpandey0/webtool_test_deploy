@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x]  # Define the Node.js versions to test against
+        node-version: [18.x]  # Update to only use Node.js version 18.x or higher
 
     steps:
     - uses: actions/checkout@v3  # Check out the code from the repository
