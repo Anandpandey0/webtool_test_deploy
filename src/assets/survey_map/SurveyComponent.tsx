@@ -3,7 +3,9 @@ import MapSurveyComponent from '@/assets/survey_map/MapSurveyComponent';
 import FieldItem from '@/assets/survey_map/FieldItem'; // Adjust the import path as necessary
 import { Button } from '@mui/material';
 import ShapefileUploadPopup from '@/assets/survey_map/ShapefileUploadPopup';
-import getGeoJsonCenter from '../../helper/centroid_geojson'
+import getGeoJsonCenter from '../../helper/centroid_geojson';
+
+type Position = [number, number]; // Define Position as a tuple with exactly two numbers
 
 const SurveyComponent = () => {
   const [fields, setFields] = useState<any[]>([]);
@@ -62,18 +64,17 @@ const SurveyComponent = () => {
     setIsPopupOpen(false);
   };
 
-  const handleSavePopupData = (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; } }) => {
+  const handleSavePopupData = (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; }; geometry?: any }) => {
     console.log('Popup Data:', drawingData);
-
+  
     // Add the new field to the state and update the sidebar immediately
     const newField = {
       ...drawingData,
       mapDrawing: {
-        // Assume your drawingData includes necessary GeoJSON data here
-        geometry: drawingData.geometry
-      }
+        geometry: drawingData.geometry || {}, // Handle the case where geometry might be undefined
+      },
     };
-
+  
     const updatedFields = [...fields, newField];
     setFields(updatedFields);
     localStorage.setItem('fieldList', JSON.stringify(updatedFields));
@@ -105,17 +106,24 @@ const SurveyComponent = () => {
         >
           {fields.map((field, index) => {
             const center = getGeoJsonCenter(field.mapDrawing); // Calculate centroid
-            return (
-              <FieldItem
-                key={index}
-                field={field}
-                index={index}
-                onEdit={handleEditField}
-                onDelete={handleDeleteField}
-                onLocate={handleLocateField}  // Pass the handleLocateField function
-                center={center} // Pass the center point to the FieldItem component
-              />
-            );
+
+            if (center.length >= 2) {  // Ensure the center has at least two elements
+              const position: Position = [center[0], center[1]]; // Extract exactly two elements
+              return (
+                <FieldItem
+                  key={index}
+                  field={field}
+                  index={index}
+                  onEdit={handleEditField}
+                  onDelete={handleDeleteField}
+                  onLocate={handleLocateField}  // Pass the handleLocateField function
+                  center={position} // Pass the center point to the FieldItem component
+                />
+              );
+            } else {
+              console.warn('Invalid center position:', center);
+              return null; // Handle cases where center is not valid
+            }
           })}
         </ul>
         <div

@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, CircularProgress } from '@mui/mater
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/router';
 import ChartDisplay from './ChartDisplay'; 
-import Map from './index'
+// import Map from './index'
 
 const SurveyStatsPage = () => {
   const router = useRouter();
@@ -117,7 +117,7 @@ const SurveyStatsPage = () => {
       <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
         <div className="map_container">
           {/* Map component */}
-          <Map fieldDetails={selectedField} centroids={centroid} apiResponse={apiResponse}/>
+          {/* <Map fieldDetails={selectedField} centroids={centroid} apiResponse={apiResponse}/> */}
         </div>
         <div
           style={{

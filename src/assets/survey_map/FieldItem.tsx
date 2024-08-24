@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import getGeoJsonCenter from '@/helper/centroid_geojson';
+
 interface Coordinates {
   type: string;
   coordinates: number[][][]; // Adjust based on the structure of your coordinates
 }
+
+type Position = [number, number]; 
 
 interface Field {
   name: string;
@@ -27,20 +30,13 @@ interface FieldItemProps {
   onEdit: (index: number, updatedField: Field) => void;
   onDelete: (index: number) => void;
   onLocate: (field: Field) => void;
+  center?: Position;  // Make center optional
 }
 
-const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, onLocate }) => {
+const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, onLocate, center }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedField, setEditedField] = useState<Field>(field);
-  const [center, setCenter] = useState<number[] | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    if (field.mapDrawing) {
-      const centerCoordinates = getGeoJsonCenter(field.mapDrawing);
-      setCenter(centerCoordinates);
-    }
-  }, [field]);
 
   const handleSave = () => {
     onEdit(index, editedField);
@@ -58,7 +54,7 @@ const FieldItem: React.FC<FieldItemProps> = ({ field, index, onEdit, onDelete, o
       router.push({
         pathname: '/field/stats',
         query: {
-          centroid:center,
+          centroid: center,  // Use the center calculated and passed as a prop
           name: field.name,
           id: field.id,
         },
