@@ -1,6 +1,8 @@
 // map.jsx
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
+import {
+  MapContainer, TileLayer, GeoJSON, ScaleControl, LayersControl,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS here
 
 
@@ -66,6 +68,8 @@ function Map({
 }) {
   const [loading, setLoading] = useState(true);
   const [geojsonData, setGeojsonData] = useState(null);
+  const [googleMapActive, setGoogleMapActive] = useState(false);
+
 
   useEffect(() => {
     setLoading(true);
@@ -161,6 +165,28 @@ function Map({
     }
   }
 
+  //nitin
+  const handleMapSwitch = () => {
+    setGoogleMapActive(!googleMapActive);
+  };
+  const RestrictedMapValues = [
+    {
+      name: 'Example Map',
+      mapBounds: [
+        [27.21962656072526 - 0.1, 80.993353177544336 - 0.1], // southWest corner of the bounds (adjusted with -0.1)
+        [27.21962656072526 + 0.1, 80.993353177544336 + 0.1], // northEast corner of the bounds (adjusted with +0.1)
+      ],
+      zoom: 10,
+      minZoom: 8,
+      maxZoom: 18,
+      mapType: 'roadmap',
+      center: [27.21962656072526, 80.993353177544336], // center of the map
+    },
+    // Add more map configurations here if needed
+  ];
+
+  const selectedMap = RestrictedMapValues[0];
+
   // Get map center and zoom based on selectedState and selectedLevel
   const { center, zoom } = mapSettings[selectedState][selectedLevel];
 
@@ -170,32 +196,54 @@ function Map({
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div className=" w-[80vw]">
+          <div className="w-[80vw]" style={{ position: "relative" }}>
             <MapContainer
-              key={`${selectedState}-${selectedLevel}`} // Add key to ensure re-render on state or level change
-              center={center} // Use dynamic center coordinates based on selectedState and selectedLevel
-              zoom={zoom} // Use dynamic zoom level based on selectedState and selectedLevel
-              style={{ height: "80vh", width: "80%" , border:"solid 2px black" }}
+              key={`${selectedState}-${selectedLevel}`}
+              center={center}
+              zoom={zoom}
+              minZoom={selectedMap.minZoom}
+              maxZoom={selectedMap.maxZoom}
+              style={{ height: "80vh", width: "80%", border: "solid 2px black" }}
             >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <LayersControl position="topright">
+                {/* OpenStreetMap Layer */}
+                <LayersControl.BaseLayer checked={!googleMapActive} name="OpenStreetMap">
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                </LayersControl.BaseLayer>
 
-              {geojsonData && (
-                <GeoJSON
-                  data={geojsonData}
-                  style={style}
-                  onEachFeature={onEachFeature}
-                />
-              )}
+                {/* Google Maps Satellite Layer */}
+                <LayersControl.BaseLayer checked={googleMapActive} name="Google Maps Satellite">
+                  <TileLayer
+                    url={`https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&apikey=AIzaSyA5sYadpLcoOTM2irEsfD4HdA0SyE-n5Eg`}
+                    attribution='&copy; <a href="https://maps.google.com/">Google Maps</a>'
+                  />
+                </LayersControl.BaseLayer>
 
+                {/* GeoJSON Layer */}
+                {geojsonData && (
+                  <LayersControl.Overlay checked name="GeoJSON Data">
+                    <GeoJSON
+                      data={geojsonData}
+                      style={style}
+                      onEachFeature={onEachFeature}
+                    />
+                  </LayersControl.Overlay>
+                )}
+
+                {/* You can add more layers here if needed */}
+              </LayersControl>
+
+              {/* Scale Control */}
               <ScaleControl position="bottomleft" />
             </MapContainer>
+
           </div>
         )}
 
-        {/* Legend or Color Scale */}
+        {/* NDVI Legend */}
         <div
           style={{
             position: "absolute",
@@ -208,111 +256,6 @@ function Map({
             zIndex: 1000,
           }}
         >
-          <h4>NDVI </h4>
-          <div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.high,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>0.8+</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.mediumHigh,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>0.5 - 0.79</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.medium,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>0.3 - 0.49</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.mediumLow,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>0.1 - 0.29</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "5px",
-              }}
-            >
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.low,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>Less than 0.1</span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "20px",
-                  height: "10px",
-                  backgroundColor: legendColors.na,
-                  marginRight: "5px",
-                }}
-              ></span>
-              <span>N/A</span>
-            </div>
-          </div>
         </div>
       </div>
     </main>
