@@ -3,28 +3,38 @@ import MapSurveyComponent from '@/assets/survey_map/MapSurveyComponent';
 import FieldItem from '@/assets/survey_map/FieldItem'; // Adjust the import path as necessary
 import { Button } from '@mui/material';
 import ShapefileUploadPopup from '@/assets/survey_map/ShapefileUploadPopup';
+import getGeoJsonCenter from '../../helper/centroid_geojson';
 
+type Position = [number, number]; // Define Position as a tuple with exactly two numbers
 
 const SurveyComponent = () => {
   const [fields, setFields] = useState<any[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to manage popup visibility
-  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void } | null>(null);
+  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void; updateMap: (fields: any[]) => void, deleteDrawing: (id: string) => void } | null>(null);
 
   useEffect(() => {
     const savedFields = JSON.parse(localStorage.getItem('fieldList') || '[]');
     setFields(savedFields);
   }, []);
 
+  useEffect(() => {
+    // Update the map when fields change
+    if (mapRef.current) {
+      mapRef.current.updateMap(fields);
+    }
+  }, [fields]);
+
   const handleSaveDrawings = (drawings: any[]) => {
     setFields(drawings);
     localStorage.setItem('fieldList', JSON.stringify(drawings));
   };
 
-  const handleFieldClick = (field: any) => {
-    if (mapRef.current && Array.isArray(field.geometry.coordinates)) {
-      // Extract the first [lng, lat] pair from the nested coordinates array
-      const coordinates = field.geometry.coordinates[0][0];
+  const handleLocateField = (field: any) => {
+    if (mapRef.current && Array.isArray(field.mapDrawing.geometry.coordinates)) {
+      const coordinates = field.mapDrawing.geometry.coordinates[0][0];
       mapRef.current.jumpToCoordinates(coordinates);
+    } else {
+      console.warn('Invalid coordinates or map reference');
     }
   };
 
@@ -36,9 +46,14 @@ const SurveyComponent = () => {
   };
 
   const handleDeleteField = (index: number) => {
+    const deletedField = fields[index];
     const updatedFields = fields.filter((_, i) => i !== index);
     setFields(updatedFields);
     localStorage.setItem('fieldList', JSON.stringify(updatedFields));
+    
+    if (mapRef.current && deletedField.mapDrawing.id) {
+      mapRef.current.deleteDrawing(deletedField.mapDrawing.id);  // Trigger drawing deletion on map
+    }
   };
 
   const handleOpenPopup = () => {
@@ -49,25 +64,35 @@ const SurveyComponent = () => {
     setIsPopupOpen(false);
   };
 
-  const handleSavePopupData = (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; } }) => {
+  const handleSavePopupData = (drawingData: { name: string; photo: string; id: string; files: { shx: File | null; dbf: File | null; prj: File | null; shp: File | null; }; geometry?: any }) => {
     console.log('Popup Data:', drawingData);
-    // Handle saving the uploaded shapefile data here
+  
+    // Add the new field to the state and update the sidebar immediately
+    const newField = {
+      ...drawingData,
+      mapDrawing: {
+        geometry: drawingData.geometry || {}, // Handle the case where geometry might be undefined
+      },
+    };
+  
+    const updatedFields = [...fields, newField];
+    setFields(updatedFields);
+    localStorage.setItem('fieldList', JSON.stringify(updatedFields));
     setIsPopupOpen(false); // Close the popup after saving
   };
 
   return (
     <div
       style={{
-        width: '100vw',
-        height: '100vh',
         display: 'flex',
+        height: 'calc(100vh - 4rem)', // Full viewport height
         overflow: 'hidden', // Prevents scrolling on the parent container
       }}
     >
       <div
         className="w-[20vw] flex flex-col sidebar py-4 p-2"
         style={{
-          height: '100vh',
+          height: '100%', // Full height of the parent container
           paddingBottom: '5rem', // Ensure it takes the full height of the viewport
         }}
       >
@@ -75,20 +100,31 @@ const SurveyComponent = () => {
         <ul
           className="overflow-y-auto flex-grow field-list"
           style={{
-            maxHeight: 'calc(100vh - 10rem)', // Adjust height to account for buttons and other elements
+            flex: 1, // Take up remaining space in the sidebar
             paddingBottom: '1rem',
           }}
         >
-          {fields.map((field, index) => (
-            <FieldItem
-              key={index}
-              field={field}
-              index={index}
-              onEdit={handleEditField}
-              onDelete={handleDeleteField}
-              onClick={handleFieldClick}
-            />
-          ))}
+          {fields.map((field, index) => {
+            const center = getGeoJsonCenter(field.mapDrawing); // Calculate centroid
+
+            if (center.length >= 2) {  // Ensure the center has at least two elements
+              const position: Position = [center[0], center[1]]; // Extract exactly two elements
+              return (
+                <FieldItem
+                  key={index}
+                  field={field}
+                  index={index}
+                  onEdit={handleEditField}
+                  onDelete={handleDeleteField}
+                  onLocate={handleLocateField}  // Pass the handleLocateField function
+                  center={position} // Pass the center point to the FieldItem component
+                />
+              );
+            } else {
+              console.warn('Invalid center position:', center);
+              return null; // Handle cases where center is not valid
+            }
+          })}
         </ul>
         <div
           className="flex flex-col items-center space-y-2 mt-4"
@@ -109,6 +145,7 @@ const SurveyComponent = () => {
       <div
         className="w-[80vw] h-full"
         style={{
+          flex: 1, // Take up remaining space in the container
           overflow: 'hidden', // Prevents scrolling on the map container
         }}
       >

@@ -58,10 +58,12 @@ const FarmerDetails: React.FC = () => {
   }
 
   return (
-    <div style={{overflow:"hidden"}}>
+    <div style={{overflow:"hidden"}} >
       <FarmerDetailsTable data={farmerDetails} />
     </div>
   );
 };
 
 export default FarmerDetails;
+
+

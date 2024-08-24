@@ -1,5 +1,3 @@
-// components/Layout.tsx
-
 import Navbar from '@/assets/home/Navbar';
 import React, { ReactNode, Suspense } from 'react';
 
@@ -41,8 +39,16 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <>
-      <div className="flex-grow bg-white h-screen overflow-hidden">
       <Navbar />
+      <div
+        className="content-wrapper"
+        style={{
+          paddingTop: '4rem',
+          
+          // height: 'calc(100vh - 4rem)', // Full height minus navbar height
+          overflow: 'hidden', // Allow scrolling if content exceeds height
+        }}
+      >
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             {children}

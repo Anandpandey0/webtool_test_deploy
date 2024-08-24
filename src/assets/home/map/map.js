@@ -208,7 +208,7 @@ function Map({
             zIndex: 1000,
           }}
         >
-          <h4>NDVI Legend</h4>
+          <h4>NDVI </h4>
           <div>
             <div
               style={{

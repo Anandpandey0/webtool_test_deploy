@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <AppBar position="static" style={{ backgroundColor: "#0F623D" }}>
+      <AppBar position="static" style={{ backgroundColor: "#0F623D" ,zIndex:'1100'}} className="navbar">
         <Toolbar>
           <IconButton
             edge="start"
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Bhooomicam
+            Bhoomicam
           </Typography>
           <Image
             src="/images/logo_bhoomicam.png"
@@ -98,6 +98,15 @@ const Navbar: React.FC = () => {
               <ListItemText primary="Crop Land Monitoring" />
             </ListItemButton>
             <ListItemButton
+              selected={selectedTab === PATHS.BHOOMISCORE}
+              onClick={() => handleListItemClick(PATHS.BHOOMISCORE)}
+            >
+              <ListItemIcon>
+                <AgricultureIcon />
+              </ListItemIcon>
+              <ListItemText primary="Bhoomiscore" />
+            </ListItemButton>
+            <ListItemButton
               selected={selectedTab === PATHS.SAVED_FEATURES}
               onClick={() => handleListItemClick(PATHS.SAVED_FEATURES)}
             >
@@ -105,6 +114,16 @@ const Navbar: React.FC = () => {
                 <BookmarkIcon />
               </ListItemIcon>
               <ListItemText primary="Saved Features" />
+            </ListItemButton>
+            {/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ */}
+            <ListItemButton
+              selected={selectedTab === PATHS.DAMAGE}
+              onClick={() => handleListItemClick(PATHS.DAMAGE)}
+            >
+              <ListItemIcon>
+                <BookmarkIcon />
+              </ListItemIcon>
+              <ListItemText primary="Damage" />
             </ListItemButton>
             <ListItemButton
               selected={selectedTab === PATHS.FARM_DASHBOARD}
@@ -115,6 +134,8 @@ const Navbar: React.FC = () => {
               </ListItemIcon>
               <ListItemText primary="Farm Dashboard" />
             </ListItemButton>
+            
+           
             <ListItemButton
               selected={selectedTab === PATHS.SUPPORT}
               onClick={() => handleListItemClick(PATHS.SUPPORT)}
