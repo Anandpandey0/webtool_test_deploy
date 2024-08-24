@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography, TextField, Autocomplete } from '@mui/material';
 import Map from './index';
+import dataContext from '@/context/dataContext';
 
 const Bhadras_Bhooscore_Component = () => {
   const [year, setYear] = useState('');
   const [season, setSeason] = useState('');
+  const { setTargetedYear, setTargetedSeason,setShowPopup } = useContext(dataContext);
 
   // Handles the change in the year dropdown
   const handleYearChange = (event: any) => {
-    setYear(event.target.value);
+    const selectedYear = event.target.value;
+    setYear(selectedYear);
     setSeason(''); // Reset season when year changes
+
+    // Set the selected year in the context
+    setTargetedYear(selectedYear);
+    setTargetedSeason('')
+    setShowPopup(false)
   };
 
   // Handles the change in the season dropdown
   const handleSeasonChange = (event: any) => {
-    setSeason(event.target.value);
+    const selectedSeason = event.target.value;
+    setSeason(selectedSeason);
+    setShowPopup(false)
+
+    // Set the selected season in the context
+    setTargetedSeason(selectedSeason);
   };
 
   // Array of year options

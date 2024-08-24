@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Paper } from '@mui/material';
-import Bhadras_Bhooscore_Component from './bhadras/Bhadras_Bhooscore_Component';
+
 import Roorkee_Bhooscore_Component from './roorkee/Roorkee_Bhooscore_Component';
+import Container from './Container';
+import Bhadras_Bhooscore_Component from './bhadras/Bhadras_Bhooscore_Component';
+import dataContext from '@/context/dataContext';
 
 
 const Parent_Bhoomiscore = () => {
   const [selectedComponent, setSelectedComponent] = useState('');
+  const {setShowPopup} = useContext(dataContext)
 
   const renderComponent = () => {
+    // setShowPopup(false)
     switch (selectedComponent) {
       case 'Bhadras':
         return <Bhadras_Bhooscore_Component />;
@@ -38,6 +43,7 @@ const Parent_Bhoomiscore = () => {
             <MenuItem value="Roorkee">Roorkee</MenuItem>
           </Select>
         </FormControl>
+        <Container/>
         {selectedComponent ? (
           <Box sx={{ width: '100%', height: '90vh' }}>
             {renderComponent()}

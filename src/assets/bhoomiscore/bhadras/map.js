@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON, ScaleControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css"; // Import Leaflet CSS here
+import dataContext from "@/context/dataContext";
 
 const legendColors = {
   10: "#004d00",
@@ -19,6 +20,7 @@ const legendColors = {
 function Map({ year, season }) {
   const [loading, setLoading] = useState(true);
   const [geojsonData, setGeojsonData] = useState(null);
+  const {setTargetedArea,setShowPopup} = useContext(dataContext)
 
   useEffect(() => {
     const fetchGeoJSON = async () => {
@@ -95,20 +97,33 @@ function Map({ year, season }) {
   }
 
   function onEachFeature(feature, layer) {
-    // Adjust this to the NDVI property you want to visualize (e.g., "2024-06")
     const bhoomiscore = feature.properties[`${year}_${season}`];
-    console.log(year, season);
-
     const formattedNdviValue = bhoomiscore !== null ? bhoomiscore : "N/A";
-
-    // Bind popup content to the layer and handle mouse events
+  
+    // Bind popup content to the layer
     layer.bindPopup(`
       <b>Bhoomiscore:</b> ${formattedNdviValue}
     `);
-
+  
+    const highlightArea = () => {
+      setTargetedArea(feature);
+      setShowPopup(true);
+  
+      // Change the style of the clicked feature to blue with highlighted boundary
+      layer.setStyle({
+        color: "blue",
+        fillColor: "blue",
+        weight: 3,
+        fillOpacity: 0.7,
+      });
+  
+      // Bring the clicked layer to the front
+      layer.bringToFront();
+    };
+  
     // Mouseover event: change style and open popup
     layer.on({
-      mouseover: (event) => {
+      mouseover: () => {
         layer.setStyle({
           weight: 2,
           color: "red",
@@ -120,9 +135,18 @@ function Map({ year, season }) {
         layer.setStyle(style(feature));
         layer.closePopup();
       },
+      click: (event) => {
+        console.log('Clicked Feature:', feature);
+        highlightArea();
+      },
+      dblclick: (event) => {
+        console.log('Double-Clicked Feature:', feature);
+        highlightArea();
+      }
     });
   }
-
+  
+  
   return (
     <main className="w-[60vw] h-[60vh]">
       <div>
