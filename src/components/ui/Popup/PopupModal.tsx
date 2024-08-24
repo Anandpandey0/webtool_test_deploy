@@ -108,7 +108,7 @@ const PopupModal = () => {
         
         <Box sx={{ flexGrow: 1, width: '100%', mt: 2 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold", mb: 0.5 }}>
-            {targetedArea?.properties.FORMER_NAM}
+            {targetedArea?.properties.FARMER_NAME}
           </Typography>
           <Typography variant="body2" color="textSecondary">
             47 Male
@@ -120,7 +120,7 @@ const PopupModal = () => {
             Village
           </Typography>
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          {targetedArea?.properties.VILLAGE_NA}
+          {targetedArea?.properties.VILLAGE}
           </Typography>
 
           <Divider sx={{ my: 2 }} />

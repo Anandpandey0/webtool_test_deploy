@@ -3,19 +3,36 @@ import { Box, TextField, Button, Typography, CircularProgress } from '@mui/mater
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useRouter } from 'next/router';
 import ChartDisplay from './ChartDisplay'; 
-// import Map from './index'
+import Map from './index'; // Import the Map.jsx component
+import GraphComponent from '@/assets/charts_test/ECharts';
 
-const SurveyStatsPage = () => {
+
+// Define types for your data
+interface FieldDetails {
+  name: string;
+  mapDrawing: {
+    geometry: {
+      coordinates: number[][][]; // Assuming coordinates is an array of arrays of arrays of numbers
+    };
+  };
+}
+
+interface ApiResponse {
+  raster_url?: string;
+  stat_api?: any;
+}
+
+const SurveyStatsPage: React.FC = () => {
   const router = useRouter();
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [selectedField, setSelectedField] = useState<any>(null);
-  const [showGraph, setShowGraph] = useState(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [selectedField, setSelectedField] = useState<FieldDetails | null>(null);
+  const [showGraph, setShowGraph] = useState<boolean>(false);
   const [graphData, setGraphData] = useState<any>(null);
-  const [coordinates, setCoordinates] = useState<any>([]);
+  const [coordinates, setCoordinates] = useState<number[][][]>([]);
   const [centroid, setCentroid] = useState<[number, number] | null>(null);
-  const [loading, setLoading] = useState(false); // Loading state
-  const [apiResponse,setApiResponse] = useState();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
 
   useEffect(() => {
     const fieldData = localStorage.getItem('selectedField');
@@ -34,8 +51,8 @@ const SurveyStatsPage = () => {
       }
       
       if (fieldData) {
-        const field = JSON.parse(fieldData);
-        setCoordinates(field.mapDrawing?.geometry?.coordinates);
+        const field: FieldDetails = JSON.parse(fieldData);
+        setCoordinates(field.mapDrawing?.geometry?.coordinates || []);
         setSelectedField(field);
       } else {
         console.log("No data found for 'selectedField'");
@@ -45,7 +62,7 @@ const SurveyStatsPage = () => {
 
   const handleViewStats = async () => {
     try {
-      setLoading(true); // Start loading
+      setLoading(true);
       const formData = new FormData();
       formData.append('coordinates', JSON.stringify(coordinates[0]));
       formData.append('start_date', startDate);
@@ -60,16 +77,16 @@ const SurveyStatsPage = () => {
         throw new Error('Failed to fetch statistics');
       }
 
-      const data = await response.json();
-      setApiResponse(data)
-      console.log(data.stat_api.Date);
+      const data: ApiResponse = await response.json();
+      setApiResponse(data);
+      console.log(data.stat_api?.Date);
 
       setShowGraph(true);
-      setGraphData(data.stat_api); // Set the graph data for Recharts
+      setGraphData(data.stat_api);
     } catch (error) {
       console.error('Error fetching statistics:', error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -115,10 +132,9 @@ const SurveyStatsPage = () => {
       </div>
 
       <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-        <div className="map_container">
-          {/* Map component */}
-          {/* <Map fieldDetails={selectedField} centroids={centroid} apiResponse={apiResponse}/> */}
-        </div>
+        {/* <div className="map_container border-2 border-solid border-black h-[80vh]">
+          <Map fieldDetails={selectedField} centroids={centroid} apiResponse={apiResponse}/>
+        </div> */}
         <div
           style={{
             flex: showGraph ? 1 : 0,
@@ -136,7 +152,7 @@ const SurveyStatsPage = () => {
             <CircularProgress />
           ) : (
             showGraph && graphData && (
-              <ChartDisplay graphData={graphData} />
+             <GraphComponent data={graphData} />
             )
           )}
         </div>

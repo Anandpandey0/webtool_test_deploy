@@ -17,25 +17,36 @@ export interface Properties {
   CROP_TYPE: string;
   DISTRICT: string;
   FATHER_NAM: string;
-  FORMER_NAM: string;
+  FARMER_NAME: string; // Updated from FORMER_NAM to FARMER_NAME
   GATA_NO: number;
   IRRIGATION: string;
   PARTATION_: number;
-  SHAPE_Area: number;
+  AREA: number; // Updated from SHAPE_Area to AREA
   SHAPE_Leng: number;
   SUB_GATA: string;
-  TEHSEEL: string;
+  TEHSIL: string; // Updated from TEHSEEL to TEHSIL
   VILLAGE_CO: number;
-  VILLAGE_NA: string;
-  area_polyg: number;
-  [key: string]: string | number | undefined; // Allow additional dynamic keys
+  VILLAGE: string; // Updated from VILLAGE_NA to VILLAGE
+  AREA_Ha: number; // Updated from area_polyg to AREA_Ha
+  [key: string]: string | number | undefined; // Allow additional dynamic keys like monthly NDVI values
 }
-
 
 export interface TargetedArea {
   type: "Feature";
   properties: Properties;
   geometry: Geometry;
+}
+
+export interface FeatureCollection {
+  type: "FeatureCollection";
+  name: string;
+  crs: {
+    type: string;
+    properties: {
+      name: string;
+    };
+  };
+  features: TargetedArea[];
 }
 
 // Define the shape of the context's data

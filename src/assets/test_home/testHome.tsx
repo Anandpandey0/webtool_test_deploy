@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import Bhadras_Bhooscore_Component from './bhadras/Bhadras_Bhooscore_Component';
 import dataContext from '@/context/dataContext';
-import Popup from './Popup/Popup';
+import Popup from '../../components/ui/Popup/Popup';
 
 const TestHome = () => {
   const { targetedArea, showPopup } = useContext(dataContext);

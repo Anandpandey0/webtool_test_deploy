@@ -1,5 +1,5 @@
-/* eslint-disable react/display-name */
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { createRoot } from 'react-dom/client';
 import Map, {
   NavigationControl,
   GeolocateControl,
@@ -10,11 +10,37 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl from 'mapbox-gl';
-import { Tooltip, Box } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import DrawingPopup from './DrawingPopup';
 import FieldItem from './FieldItem';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
+
+// Custom mode that disables dragging
+const NoDragMode = {
+  ...MapboxDraw.modes.simple_select,
+  onDrag: () => {}, // Disable dragging completely
+  onMouseDown: (state: any, e: any) => {
+    // Prevent dragging on mouse down
+    if (e.originalEvent.button === 0) {
+      state.dragMoving = false;
+      state.canDragMove = false;
+    }
+  },
+};
+
+// Wrapper component for HTMLElement
+const HTMLElementWrapper = ({ element }: { element: HTMLElement }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.appendChild(element);
+    }
+  }, [element]);
+
+  return <div ref={ref} />;
+};
 
 const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (data: any[]) => void }, ref) => {
   const mapRef = useRef<any>(null);
@@ -30,7 +56,20 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
 
   const handleMapLoad = () => {
     const map = mapRef.current.getMap();
-    const draw = new MapboxDraw();
+
+    // Initialize Mapbox Draw with custom controls and modes
+    const draw = new MapboxDraw({
+      displayControlsDefault: false, // Disable all controls by default
+      controls: {
+        polygon: true,
+        trash: true,
+      },
+      modes: {
+        ...MapboxDraw.modes,
+        simple_select: NoDragMode, // Override the default mode
+      },
+    });
+
     drawRef.current = draw;
     map.addControl(draw);
 
@@ -45,11 +84,38 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(new mapboxgl.FullscreenControl());
     map.addControl(new mapboxgl.GeolocateControl());
+    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left'); // Specify position directly here
 
     map.on('draw.create', handleDrawingCreate);
 
     // Listen for delete events on the map
     map.on('draw.delete', handleMapDelete);
+
+    // Adding tooltips to the draw controls
+    setTimeout(() => {
+      const polygonButton = document.querySelector('.mapbox-gl-draw_polygon');
+      const trashButton = document.querySelector('.mapbox-gl-draw_trash');
+
+      if (polygonButton && polygonButton.parentElement) {
+        const tooltipContainer = document.createElement('div');
+        createRoot(tooltipContainer).render(
+          <Tooltip title="Draw a Polygon" placement="left">
+            <HTMLElementWrapper element={polygonButton.cloneNode(true) as HTMLElement} />
+          </Tooltip>
+        );
+        polygonButton.parentElement.replaceChild(tooltipContainer, polygonButton);
+      }
+
+      if (trashButton && trashButton.parentElement) {
+        const tooltipContainer = document.createElement('div');
+        createRoot(tooltipContainer).render(
+          <Tooltip title="Delete Drawing" placement="left">
+            <HTMLElementWrapper element={trashButton.cloneNode(true) as HTMLElement} />
+          </Tooltip>
+        );
+        trashButton.parentElement.replaceChild(tooltipContainer, trashButton);
+      }
+    }, 500);
   };
 
   const handleMapDelete = (event: any) => {
@@ -119,7 +185,7 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
     localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
 
     if (mapRef.current && deletedField.mapDrawing.id) {
-      mapRef.current.deleteDrawing(deletedField.mapDrawing.id); // Trigger drawing deletion on the map
+      drawRef.current.delete(deletedField.mapDrawing.id); // Trigger drawing deletion on the map
     }
   };
 
@@ -182,31 +248,6 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
         onLoad={handleMapLoad}
         style={{ width: '100%', height: '100%' }}
       >
-        <Box className="absolute top-4 right-4 z-10 flex flex-col space-y-2">
-          <Tooltip title="Zoom In/Out" placement="left">
-            <div>
-              <NavigationControl showCompass={false} />
-            </div>
-          </Tooltip>
-
-          <Tooltip title="Toggle Fullscreen" placement="left">
-            <div>
-              <FullscreenControl />
-            </div>
-          </Tooltip>
-
-          <Tooltip title="Locate Me" placement="left">
-            <div>
-              <GeolocateControl />
-            </div>
-          </Tooltip>
-
-          <Tooltip title="Scale" placement="left">
-            <div>
-              <ScaleControl />
-            </div>
-          </Tooltip>
-        </Box>
       </Map>
 
       <ul>

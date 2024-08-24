@@ -1,12 +1,55 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 
-const NDVIGraph: React.FC = () => {
+interface StatAPI {
+  Date: string[];
+  "Mean GCI": number[];
+  "Mean NDMI": number[];
+  "Mean NDVI": number[];
+}
+
+interface NDVIGraphProps {
+  data: StatAPI;
+}
+
+const GraphComponent: React.FC<NDVIGraphProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
+  const getMinMax = (data: StatAPI) => {
+    const minMax = {
+      ndvi: { min: Math.min(...data["Mean NDVI"]), max: Math.max(...data["Mean NDVI"]) },
+      gci: { min: Math.min(...data["Mean GCI"]), max: Math.max(...data["Mean GCI"]) },
+      ndmi: { min: Math.min(...data["Mean NDMI"]), max: Math.max(...data["Mean NDMI"]) },
+    };
+    return minMax;
+  };
+
+  const calculateYAxisRange = (minMax: { ndvi: { min: number, max: number }, gci: { min: number, max: number }, ndmi: { min: number, max: number } }) => {
+    const deviations = {
+      ndvi: minMax.ndvi.max - minMax.ndvi.min,
+      gci: minMax.gci.max - minMax.gci.min,
+      ndmi: minMax.ndmi.max - minMax.ndmi.min,
+    };
+
+    const maxDeviation = Math.max(deviations.ndvi, deviations.gci, deviations.ndmi);
+    const minValue = Math.min(minMax.ndvi.min, minMax.gci.min, minMax.ndmi.min);
+    const maxValue = Math.max(minMax.ndvi.max, minMax.gci.max, minMax.ndmi.max);
+
+    const padding = maxDeviation * 0.1; // Add 10% padding to the range
+
+    return {
+      min: minValue - padding,
+      max: maxValue + padding,
+      interval: (maxValue - minValue + 2 * padding) / 5, // Create larger chunks
+    };
+  };
+
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && data) {
       const chartInstance = echarts.init(chartRef.current);
+
+      const minMax = getMinMax(data);
+      const yAxisRange = calculateYAxisRange(minMax);
 
       const chartOptions = {
         backgroundColor: '#2b2b2b', // Dark grey background
@@ -35,47 +78,25 @@ const NDVIGraph: React.FC = () => {
         },
         legend: {
           data: [
-            'NDVI (2023/2024)',
-            'NDVI (2022/2023)',
-            'NDVI (2021/2022)',
-            'NDVI (2020/2021)',
-            'Typical index range',
+            'Greenness',
+            'Chlorophyll',
+            'Moisture',
           ],
           textStyle: {
             color: '#ffffff', // White legend text
           },
           top: '5%',
           left: '10%',
-          selected: {
-            'NDVI (2023/2024)': true,
-            'NDVI (2022/2023)': false,
-            'NDVI (2021/2022)': false,
-            'NDVI (2020/2021)': false,
-            'Typical index range': false,
-          },
         },
         grid: {
           top: '15%',
           left: '10%',
           right: '5%',
-          bottom: '10%',
+          bottom: '15%', // Increase bottom padding to prevent overlap
         },
         xAxis: {
           type: 'category',
-          data: [
-            'Aug 22',
-            'Sep 20',
-            'Oct 19',
-            'Nov 17',
-            'Dec 16',
-            'Jan 14',
-            'Feb 15',
-            'Mar 12',
-            'Apr 10',
-            'May 9',
-            'Jun 7',
-            'Jul 6',
-          ],
+          data: data.Date,
           axisLine: {
             lineStyle: {
               color: '#ffffff', // White axis line
@@ -91,8 +112,9 @@ const NDVIGraph: React.FC = () => {
         },
         yAxis: {
           type: 'value',
-          min: 0,
-          max: 0.8,
+          min: yAxisRange.min,
+          max: yAxisRange.max,
+          interval: yAxisRange.interval, // Set larger chunks for the y-axis
           axisLine: {
             lineStyle: {
               color: '#ffffff', // White axis line
@@ -106,13 +128,14 @@ const NDVIGraph: React.FC = () => {
               color: '#444444', // Grey grid lines
             },
           },
+          scale: true, // Makes the axis scale dynamically to highlight deviations
         },
         series: [
           {
-            name: 'NDVI (2023/2024)',
+            name: 'Greenness', // Renamed from 'Mean NDVI'
             type: 'line',
             smooth: true,
-            data: [0.64, 0.62, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.6, 0.65, 0.7],
+            data: data["Mean NDVI"],
             lineStyle: {
               color: '#00E676',
               width: 3,
@@ -127,10 +150,10 @@ const NDVIGraph: React.FC = () => {
             },
           },
           {
-            name: 'NDVI (2022/2023)',
+            name: 'Chlorophyll', // Renamed from 'Mean GCI'
             type: 'line',
             smooth: true,
-            data: [0.6, 0.55, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.6, 0.62, 0.65],
+            data: data["Mean GCI"],
             lineStyle: {
               color: '#76e7ff',
               width: 3,
@@ -145,10 +168,10 @@ const NDVIGraph: React.FC = () => {
             },
           },
           {
-            name: 'NDVI (2021/2022)',
+            name: 'Moisture', // Renamed from 'Mean NDMI'
             type: 'line',
             smooth: true,
-            data: [0.55, 0.52, 0.38, 0.42, 0.46, 0.51, 0.56, 0.62, 0.68, 0.55, 0.57, 0.6],
+            data: data["Mean NDMI"],
             lineStyle: {
               color: '#4a90e2',
               width: 3,
@@ -162,40 +185,27 @@ const NDVIGraph: React.FC = () => {
               focus: 'series',
             },
           },
+        ],
+        dataZoom: [
           {
-            name: 'NDVI (2020/2021)',
-            type: 'line',
-            smooth: true,
-            data: [0.5, 0.48, 0.36, 0.4, 0.44, 0.48, 0.53, 0.58, 0.64, 0.52, 0.54, 0.57],
-            lineStyle: {
-              color: '#ff6f61',
-              width: 3,
-            },
-            symbol: 'circle',
-            symbolSize: 8,
-            itemStyle: {
-              color: '#ff6f61', // Red-orange color for filled circle, matching the line
-            },
-            emphasis: {
-              focus: 'series',
-            },
+            type: 'inside',
+            xAxisIndex: 0,
+            start: 0,
+            end: 100,
           },
           {
-            name: 'Typical index range',
-            type: 'line',
-            smooth: true,
-            data: [0.58, 0.57, 0.44, 0.48, 0.52, 0.56, 0.61, 0.66, 0.72, 0.58, 0.61, 0.64],
-            lineStyle: {
-              color: '#ffd700',
-              width: 3,
-            },
-            symbol: 'circle',
-            symbolSize: 8,
-            itemStyle: {
-              color: '#ffd700', // Gold color for filled circle, matching the line
-            },
-            emphasis: {
-              focus: 'series',
+            type: 'slider',
+            xAxisIndex: 0,
+            start: 0,
+            end: 100,
+            height: 20,  // Adjusted height to make it less obtrusive
+            bottom: 0,  // Position the slider at the bottom
+            backgroundColor: 'transparent', // Makes the slider background transparent
+            fillerColor: 'transparent',  // Makes the filled area transparent
+            borderColor: 'transparent',  // Makes the border of the slider transparent
+            handleStyle: {
+              color: 'transparent',  // Makes the handle transparent
+              shadowBlur: 0,
             },
           },
         ],
@@ -215,9 +225,9 @@ const NDVIGraph: React.FC = () => {
         chartInstance.dispose();
       };
     }
-  }, []);
+  }, [data]);
 
   return <div ref={chartRef} style={{ height: '500px', width: '100%' }} />;
 };
 
-export default NDVIGraph;
+export default GraphComponent;

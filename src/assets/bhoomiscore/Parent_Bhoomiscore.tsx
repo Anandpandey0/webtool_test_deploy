@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Paper } from '@mui/material';
 
 import Roorkee_Bhooscore_Component from './roorkee/Roorkee_Bhooscore_Component';
@@ -10,6 +10,10 @@ import dataContext from '@/context/dataContext';
 const Parent_Bhoomiscore = () => {
   const [selectedComponent, setSelectedComponent] = useState('');
   const {setShowPopup} = useContext(dataContext)
+
+  useEffect(() => {
+    setShowPopup(false);
+  }, [selectedComponent, setShowPopup]);
 
   const renderComponent = () => {
     // setShowPopup(false)
