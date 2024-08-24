@@ -4,25 +4,30 @@ import FieldItem from '@/assets/survey_map/FieldItem'; // Adjust the import path
 import { Button } from '@mui/material';
 import ShapefileUploadPopup from '@/assets/survey_map/ShapefileUploadPopup';
 
-
 const SurveyComponent = () => {
   const [fields, setFields] = useState<any[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to manage popup visibility
-  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void } | null>(null);
+  const mapRef = useRef<{ jumpToCoordinates: (coordinates: number[]) => void; updateMap: (fields: any[]) => void } | null>(null);
 
   useEffect(() => {
     const savedFields = JSON.parse(localStorage.getItem('fieldList') || '[]');
     setFields(savedFields);
   }, []);
 
+  useEffect(() => {
+    // Update the map when fields change
+    if (mapRef.current) {
+      mapRef.current.updateMap(fields);
+    }
+  }, [fields]);
+
   const handleSaveDrawings = (drawings: any[]) => {
     setFields(drawings);
     localStorage.setItem('fieldList', JSON.stringify(drawings));
   };
 
-  const handleFieldClick = (field: any) => {
+  const handleLocateField = (field: any) => {
     if (mapRef.current && Array.isArray(field.geometry.coordinates)) {
-      // Extract the first [lng, lat] pair from the nested coordinates array
       const coordinates = field.geometry.coordinates[0][0];
       mapRef.current.jumpToCoordinates(coordinates);
     }
@@ -39,6 +44,10 @@ const SurveyComponent = () => {
     const updatedFields = fields.filter((_, i) => i !== index);
     setFields(updatedFields);
     localStorage.setItem('fieldList', JSON.stringify(updatedFields));
+    
+    if (mapRef.current) {
+      mapRef.current.updateMap(updatedFields);  // Trigger map update
+    }
   };
 
   const handleOpenPopup = () => {
@@ -68,15 +77,20 @@ const SurveyComponent = () => {
         className="w-[20vw] flex flex-col sidebar py-4 p-2"
         style={{
           height: '100vh',
-          paddingBottom: '5rem', // Ensure it takes the full height of the viewport
+          paddingBottom: '5rem',
+          paddingTop: '6rem',  // Adjust padding at the top
+          paddingLeft: '1rem', // Add left padding to give space to the content
+          paddingRight: '1rem', // Add right padding for consistency
         }}
       >
         <h3 className="text-lg font-bold mb-4 text-center">Your Fields</h3>
         <ul
           className="overflow-y-auto flex-grow field-list"
           style={{
-            maxHeight: 'calc(100vh - 10rem)', // Adjust height to account for buttons and other elements
+            maxHeight: 'calc(100vh - 12rem)', // Adjust height to account for buttons and other elements
             paddingBottom: '1rem',
+            paddingLeft: '0.5rem', // Add padding inside the list
+            paddingRight: '0.5rem', // Add padding inside the list
           }}
         >
           {fields.map((field, index) => (
@@ -86,7 +100,7 @@ const SurveyComponent = () => {
               index={index}
               onEdit={handleEditField}
               onDelete={handleDeleteField}
-              onClick={handleFieldClick}
+              onLocate={handleLocateField}  // Pass the handleLocateField function
             />
           ))}
         </ul>
@@ -95,6 +109,7 @@ const SurveyComponent = () => {
           style={{
             padding: '1rem',
             paddingBottom: '2rem',
+            marginTop: '1rem', // Add margin at the top of the button
           }}
         >
           <Button

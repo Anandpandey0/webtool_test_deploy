@@ -256,8 +256,6 @@ function Map({
             zIndex: 1000,
           }}
         >
-          <h4>NDVI Legend</h4>
-          {/* Legend content here */}
         </div>
       </div>
     </main>

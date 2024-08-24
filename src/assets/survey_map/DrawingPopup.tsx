@@ -13,12 +13,26 @@ const DrawingPopup: React.FC<DrawingPopupProps> = ({ open, onClose, onSave }) =>
   const [id, setId] = useState('');
 
   const handleSave = () => {
-    onSave({ name, photo, id });
-    onClose();
+    if (name && photo && id) {  // Ensure all fields are filled before saving
+      onSave({ name, photo, id });
+      onClose();
+    } else {
+      // Optionally: you could add some form validation here to inform the user
+      alert('Please fill out all fields.');
+    }
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={(event, reason) => {
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+          return;
+        }
+        onClose();
+      }}
+      disableEscapeKeyDown
+    >
       <DialogTitle>Enter Drawing Details</DialogTitle>
       <DialogContent>
         <TextField

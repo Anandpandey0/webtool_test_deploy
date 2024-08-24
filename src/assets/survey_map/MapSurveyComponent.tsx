@@ -10,105 +10,172 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import mapboxgl from 'mapbox-gl';
-import { Tooltip, Box, Button } from '@mui/material';
+import { Tooltip, Box } from '@mui/material';
 import DrawingPopup from './DrawingPopup';
-// import LocationSearch from './LocationSearch';
+import FieldItem from './FieldItem';
 
-// Set your Mapbox token here
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (data: any[]) => void }, ref) => {
   const mapRef = useRef<any>(null);
   const drawRef = useRef<any>(null);
-  const [drawings, setDrawings] = useState<any[]>([]);
-  const [showSaveButton, setShowSaveButton] = useState(false);
+  const [fieldList, setFieldList] = useState<any[]>([]);
   const [popupOpen, setPopupOpen] = useState(false);
-  const [newDrawing, setNewDrawing] = useState<any>(null);
+  const [pendingDrawing, setPendingDrawing] = useState<any>(null); // Temporarily store the drawing
 
   useEffect(() => {
-    const savedDrawings = JSON.parse(localStorage.getItem('mapDrawings') || '[]');
-    setDrawings(savedDrawings);
+    const savedFieldList = JSON.parse(localStorage.getItem('fieldList') || '[]');
+    setFieldList(savedFieldList);
   }, []);
 
   const handleMapLoad = () => {
     const map = mapRef.current.getMap();
-
-    // Initialize Mapbox Draw
     const draw = new MapboxDraw();
     drawRef.current = draw;
     map.addControl(draw);
 
-    // Load existing drawings from local storage
-    if (drawings.length > 0) {
-      drawings.forEach((drawing) => {
-        draw.add(drawing);
+    if (fieldList.length > 0) {
+      fieldList.forEach((field) => {
+        if (field.mapDrawing) {
+          draw.add(field.mapDrawing);
+        }
       });
     }
 
-    // Add other controls
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(new mapboxgl.FullscreenControl());
     map.addControl(new mapboxgl.GeolocateControl());
 
-    // Listen for drawing events
     map.on('draw.create', handleDrawingCreate);
+
+    // Listen for delete events on the map
+    map.on('draw.delete', handleMapDelete);
+  };
+
+  const handleMapDelete = (event: any) => {
+    const deletedIds = event.features.map((feature: any) => feature.id);
+    const updatedFieldList = fieldList.filter((field) => !deletedIds.includes(field.mapDrawing?.id));
+    setFieldList(updatedFieldList);
+    localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
   };
 
   const handleDrawingCreate = (event: any) => {
     const newFeature = event.features[0];
-    setNewDrawing(newFeature);
+    setPendingDrawing(newFeature); // Temporarily store the drawing
     setPopupOpen(true);
   };
 
   const handlePopupSave = (drawingData: { name: string; photo: string; id: string }) => {
-    if (newDrawing) {
-      const updatedDrawing = {
-        ...newDrawing,
-        properties: { ...drawingData },
+    if (pendingDrawing) {
+      const updatedField = {
+        name: drawingData.name,
+        id: drawingData.id,
+        mapDrawing: {
+          ...pendingDrawing,
+          properties: {
+            ...pendingDrawing.properties,
+            name: drawingData.name,
+            photo: drawingData.photo,
+            id: drawingData.id,
+          },
+        },
       };
-      const updatedDrawings = [...drawings, updatedDrawing];
-      setDrawings(updatedDrawings);
-      localStorage.setItem('mapDrawings', JSON.stringify(updatedDrawings));
-      setShowSaveButton(true);
+      const updatedFieldList = [...fieldList, updatedField];
+      setFieldList(updatedFieldList);
+      localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
+
+      setPendingDrawing(null); // Clear the pending drawing after saving
+    }
+    setPopupOpen(false);
+  };
+
+  const handlePopupCancel = () => {
+    if (pendingDrawing) {
+      // Delete the drawing from the map if the user cancels the popup
+      drawRef.current.delete(pendingDrawing.id);
+      setPendingDrawing(null); // Clear the pending drawing
+    }
+    setPopupOpen(false);
+  };
+
+  const handleLocateField = (field: any) => {
+    if (mapRef.current && Array.isArray(field.mapDrawing.geometry.coordinates)) {
+      const coordinates = field.mapDrawing.geometry.coordinates[0][0];
+      mapRef.current.jumpToCoordinates(coordinates);
     }
   };
 
-  const handleSaveDrawings = () => {
-    onSaveDrawings(drawings);
-    setShowSaveButton(false);
+  const handleEditField = (index: number, updatedField: any) => {
+    const updatedFieldList = [...fieldList];
+    updatedFieldList[index] = updatedField;
+    setFieldList(updatedFieldList);
+    localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
   };
 
-  const jumpToCoordinates = (coordinates: number[] | { lng: number, lat: number }) => {
-    const map = mapRef.current.getMap();
-    map.flyTo({
-      center: Array.isArray(coordinates) ? coordinates : [coordinates.lng, coordinates.lat],
-      zoom: 16,
-      speed: 1.2,
-      curve: 1,
-      easing: (t: any) => t,
-      essential: true,
-    });
-  };
+  const handleDeleteField = (index: number) => {
+    const deletedField = fieldList[index];
+    const updatedFieldList = fieldList.filter((_, i) => i !== index);
+    setFieldList(updatedFieldList);
+    localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
 
-  const handleLocationSelect = (coordinates: { lat: number; lng: number }) => {
-    jumpToCoordinates([coordinates.lng, coordinates.lat]);
+    if (mapRef.current && deletedField.mapDrawing.id) {
+      mapRef.current.deleteDrawing(deletedField.mapDrawing.id); // Trigger drawing deletion on the map
+    }
   };
 
   useImperativeHandle(ref, () => ({
-    jumpToCoordinates,
+    jumpToCoordinates: (coordinates: number[]) => {
+      const map = mapRef.current.getMap();
+      map.flyTo({
+        center: coordinates,
+        zoom: 16,
+        speed: 1.2,
+        curve: 1,
+        easing: (t: any) => t,
+        essential: true,
+      });
+    },
+    updateMap: (newFields: any[]) => {
+      if (mapRef.current && drawRef.current) {
+        const map = mapRef.current.getMap();
+        const draw = drawRef.current;
+
+        // Clear all existing drawings from the map
+        const existingDrawings = draw.getAll().features;
+        existingDrawings.forEach((drawing: any) => {
+          draw.delete(drawing.id);
+        });
+
+        // Add the new set of drawings to the map
+        newFields.forEach((field) => {
+          if (field.mapDrawing) {
+            draw.add(field.mapDrawing);
+          }
+        });
+      } else {
+        console.warn('Map or Draw control is not yet initialized.');
+      }
+    },
+    deleteDrawing: (drawingId: string) => {
+      if (mapRef.current && drawRef.current) {
+        const draw = drawRef.current;
+        draw.delete(drawingId);
+
+        const updatedFieldList = fieldList.filter((field) => field.mapDrawing.id !== drawingId);
+        setFieldList(updatedFieldList);
+        localStorage.setItem('fieldList', JSON.stringify(updatedFieldList));
+      }
+    },
   }));
 
   return (
     <div className="h-screen w-full relative">
-      {/* <Box className="absolute top-4 left-4 z-10 w-[300px]">
-        <LocationSearch onSelectLocation={handleLocationSelect} />
-      </Box> */}
       <Map
         ref={mapRef}
         initialViewState={{
-          latitude: 51.505,
-          longitude: -0.09,
-          zoom: 13,
+          latitude: 27.891535,
+          longitude: 78.078743,
+          zoom: 4,
         }}
         mapStyle="mapbox://styles/mapbox/satellite-v9"
         mapboxAccessToken={mapboxgl.accessToken}
@@ -140,17 +207,24 @@ const MapSurveyComponent = forwardRef(({ onSaveDrawings }: { onSaveDrawings: (da
             </div>
           </Tooltip>
         </Box>
-        {showSaveButton && (
-          <Box className="absolute bottom-4 left-4 z-10">
-            <Button variant="contained" color="primary" onClick={handleSaveDrawings}>
-              Save Drawings
-            </Button>
-          </Box>
-        )}
       </Map>
+
+      <ul>
+        {fieldList.map((field, index) => (
+          <FieldItem
+            key={index}
+            field={field}
+            index={index}
+            onEdit={handleEditField}
+            onDelete={handleDeleteField}
+            onLocate={handleLocateField}
+          />
+        ))}
+      </ul>
+
       <DrawingPopup
         open={popupOpen}
-        onClose={() => setPopupOpen(false)}
+        onClose={handlePopupCancel}
         onSave={handlePopupSave}
       />
     </div>
