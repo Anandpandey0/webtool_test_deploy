@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
-
 // Dynamically import the FarmDetailsTable component without suspense
 const FarmDetailsTable = dynamic(() => import('@/assets/farm_details/FarmDetailsTable'), {
   loading: () => <div className="text-2xl">Loading Table...</div>,
@@ -60,9 +59,7 @@ const FarmDetails: React.FC = () => {
   return (
     <div>
       <FarmDetailsTable data={farmDetails} />
-      
     </div>
-    
   );
 };
 

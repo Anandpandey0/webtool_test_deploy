@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { PATHS } from "@/helper/PageHandler";
 import { useRouter } from "next/router";
 import SurveyComponent from "@/assets/survey_map/SurveyComponent";
-import Footer from "@/components/sushmit/Footer";
 
 interface FarmDetail {
   TEHSIL: string;
@@ -72,14 +71,10 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-200">
-      <div className="flex-grow">
-        {renderContent()}
-      </div>
-      <Footer />
+    <div className="flex-grow bg-gray-200 overflow-hidden">
+      {renderContent()}
     </div>
   );
-  
 };
 
 export default Home;

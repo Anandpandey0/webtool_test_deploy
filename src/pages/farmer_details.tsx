@@ -3,7 +3,6 @@ import { bhoomiscore } from '@/assets/farm_details/data/bhoomiscore';
 import FarmerDetailsTable from '@/assets/FarmerDetailsTable';
 
 
-
 interface FarmerDetail {
   farm_id: number;
   '2019_Rabi': number;
@@ -61,7 +60,6 @@ const FarmerDetails: React.FC = () => {
   return (
     <div style={{overflow:"hidden"}} >
       <FarmerDetailsTable data={farmerDetails} />
-     
     </div>
   );
 };
